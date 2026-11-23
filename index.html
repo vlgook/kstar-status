@@ -1,0 +1,23 @@
+<!DOCTYPE html><html lang="uk"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>KSTAR · закладка</title>
+<style>:root{--bg:#f3f1ec;--card:#fff;--ink:#16181a;--mute:#696d72;--line:#e5e1d8;--acc:#2459d6}
+@media (prefers-color-scheme:dark){:root{--bg:#0c0e10;--card:#15181b;--ink:#eceef0;--mute:#8b9097;--line:#252a2f;--acc:#6a96ff}}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+.w{max-width:720px;margin:0 auto;padding:24px 16px}h1{font-size:22px;margin:0 0 6px}p{color:var(--mute);margin:0 0 18px}
+.c{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px;margin-bottom:12px}.c h2{font-size:16px;margin:0 0 10px}
+ol{margin:0;padding-left:20px}li{margin:6px 0}
+a.bm{display:inline-block;margin:10px 0 4px;padding:12px 20px;border-radius:12px;background:var(--acc);color:#fff;font-weight:700;text-decoration:none;cursor:grab}
+textarea{width:100%;height:120px;box-sizing:border-box;font:12px ui-monospace,monospace;border:1px solid var(--line);border-radius:10px;padding:8px;background:var(--bg);color:var(--ink)}
+button{margin-top:8px;padding:9px 16px;border-radius:10px;border:1px solid var(--line);background:var(--card);color:var(--ink);font-weight:600;cursor:pointer}
+code{background:var(--bg);padding:1px 6px;border-radius:6px}</style></head><body><div class="w">
+<h1>KSTAR · статус</h1><p>Закладка відкриває компактну сторінку зі статусами вашого інвертора. Працює, коли ви залогінені на sync.ksdatacloud.com.</p>
+<div class="c"><h2>Комп'ютер (Chrome, Edge)</h2><ol>
+<li>Увімкніть панель закладок: <code>Ctrl+Shift+B</code>.</li>
+<li>Перетягніть цю кнопку на панель закладок:<br><a class="bm" href="javascript:(function(){if(location.host!=='sync.ksdatacloud.com'){location.href='https://sync.ksdatacloud.com/';return}var w=window.open('','_blank')||window;fetch('https://vlgook.github.io/kstar-status/dash.html?v='+Date.now(),{cache:'no-store'}).then(function(r){if(!r.ok)throw r.status;return r.text()}).then(function(h){w.document.open();w.document.write(h);w.document.close()}).catch(function(e){w.document.body.innerHTML='&lt;p style=&quot;font:16px sans-serif;padding:20px&quot;>Не вдалося завантажити сторінку з GitHub ('+e+').&lt;/p>'})})()" onclick="alert('Перетягніть кнопку на панель закладок, а не натискайте тут.');return false">⚡ KSTAR статус</a></li>
+<li>Відкрийте <a href="https://sync.ksdatacloud.com/" target="_blank">sync.ksdatacloud.com</a>, увійдіть і натисніть закладку. Статуси відкриються в новій вкладці.</li></ol></div>
+<div class="c"><h2>Android (Chrome)</h2><ol>
+<li>Скопіюйте код нижче.</li>
+<li>Додайте будь-яку сторінку в закладки (☆), потім відредагуйте закладку: назва <code>kstar</code>, у полі адреси вставте скопійований код.</li>
+<li>Відкрийте портал KSTAR, у адресному рядку наберіть <code>kstar</code> і виберіть закладку зі списку (з іконкою зірочки).</li></ol>
+<textarea id="t" readonly>javascript:(function(){if(location.host!=='sync.ksdatacloud.com'){location.href='https://sync.ksdatacloud.com/';return}var w=window.open('','_blank')||window;fetch('https://vlgook.github.io/kstar-status/dash.html?v='+Date.now(),{cache:'no-store'}).then(function(r){if(!r.ok)throw r.status;return r.text()}).then(function(h){w.document.open();w.document.write(h);w.document.close()}).catch(function(e){w.document.body.innerHTML='&lt;p style=&quot;font:16px sans-serif;padding:20px&quot;>Не вдалося завантажити сторінку з GitHub ('+e+').&lt;/p>'})})()</textarea><button onclick="navigator.clipboard.writeText(document.getElementById('t').value).then(()=>this.textContent='Скопійовано ✓')">Копіювати код</button></div>
+<p style="font-size:13px">Сама закладка лише підтягує свіжу версію сторінки з цього репозиторію, тож після оновлень коду перевстановлювати її не треба. Вона не зберігає і не передає пароль чи токен: сторінка використовує сесію порталу, відкриту у вашому браузері. Дані йдуть лише між браузером і sync.ksdatacloud.com.</p>
+</div></body></html>
