@@ -98,6 +98,19 @@ table.en td small{color:var(--mute);font-weight:500;font-size:11px;margin-left:2
 @media (max-width:559px){#nt .lbl{display:none}#nt{padding:0;width:40px;justify-content:center}}
 #nt.on{color:var(--ok);border-color:color-mix(in srgb,var(--ok) 40%,transparent)}
 .hbtn{display:flex;gap:8px}
+.chhead{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:10px}
+.chhead h2{margin:0}
+.dnav{display:inline-flex;align-items:center;gap:4px;background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:3px}
+.dnav button{all:unset;cursor:pointer;padding:4px 10px;border-radius:7px;font-weight:700;color:var(--mute)}
+.dnav button:disabled{opacity:.3;cursor:default}
+.dnav span{min-width:110px;text-align:center;font-size:13px;font-weight:600}
+.legend{display:flex;gap:14px;flex-wrap:wrap;font-size:12px;color:var(--mute);margin-bottom:8px}
+.legend i{display:inline-block;width:12px;height:3px;border-radius:2px;vertical-align:middle;margin-right:6px}
+.legend i.blk{height:10px;width:10px;border-radius:2px}
+.chbox{position:relative;height:260px}
+@media (min-width:760px){.chbox{height:320px}}
+.dsum{display:flex;gap:8px 20px;flex-wrap:wrap;margin-top:12px;font-size:13px;color:var(--mute)}
+.dsum b{color:var(--ink);font-weight:700}
 .kv{display:grid;grid-template-columns:repeat(2,1fr);gap:14px 16px}
 .kv label{display:block;color:var(--mute);font-size:12px}
 .kv b{font-size:20px;font-weight:700}
@@ -126,6 +139,21 @@ footer a{color:inherit}
       <div class="flow"><label>Мережа</label><b id="fGrid">–</b><div class="sub" id="fGridSub">&nbsp;</div></div>
       <div class="flow"><label>Сонце</label><b id="fPv">–</b><div class="sub" id="fPvSub">&nbsp;</div></div>
     </div>
+  </section>
+
+  <section class="card" style="margin-top:12px">
+    <div class="chhead">
+      <h2>Графік за добу</h2>
+      <div class="dnav"><button id="dPrev" title="Попередній день">‹</button><span id="dLbl">Сьогодні</span><button id="dNext" title="Наступний день">›</button></div>
+    </div>
+    <div class="legend">
+      <span><i id="lgSoc"></i>SoC, %</span>
+      <span><i id="lgLoad"></i>Навантаження, Вт</span>
+      <span><i id="lgGrid"></i>З мережі, Вт</span>
+      <span><i class="blk" id="lgOff"></i>Без мережі</span>
+    </div>
+    <div class="chbox"><canvas id="chart"></canvas></div>
+    <div class="dsum" id="dsum"></div>
   </section>
 
   <div class="grid">
@@ -236,6 +264,100 @@ footer a{color:inherit}
   });
   paintNt();
 
+  // ---- графік за добу ----
+  let chart = null, chartDay = null; // null = сьогодні
+  const DAYS = ['неділя', 'понеділок', 'вівторок', 'середа', 'четвер', 'пʼятниця', 'субота'];
+  const alpha = (c, a) => { const h = c.replace('#', ''); if (h.length !== 6) return c; const n = parseInt(h, 16); return 'rgba(' + (n >> 16 & 255) + ',' + (n >> 8 & 255) + ',' + (n & 255) + ',' + a + ')'; };
+  const cssv = v => getComputedStyle(document.documentElement).getPropertyValue(v).trim();
+  function needChart() {
+    if (window.Chart) return Promise.resolve();
+    return new Promise((res, rej) => { const sc = document.createElement('script'); sc.src = 'https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js'; sc.onload = res; sc.onerror = rej; document.head.appendChild(sc); });
+  }
+  function shiftDay(n) {
+    const today = kyivDate();
+    const d = new Date((chartDay || today) + 'T12:00:00Z'); d.setUTCDate(d.getUTCDate() + n);
+    const x = d.toISOString().slice(0, 10);
+    chartDay = x >= today ? null : x;
+    loadChart(null);
+  }
+  async function loadChart(histToday) {
+    const day = chartDay || kyivDate();
+    const d = new Date(day + 'T12:00:00Z');
+    $('dLbl').textContent = chartDay ? DAYS[d.getUTCDay()] + ', ' + p2(d.getUTCDate()) + '.' + p2(d.getUTCMonth() + 1) : 'Сьогодні';
+    $('dNext').disabled = !chartDay;
+    try {
+      const h = (!chartDay && histToday) ? histToday : await api('/residential/history/data/kse/list?deviceId=' + ST.cid + '&stime=' + day);
+      await needChart();
+      drawChart(h, day);
+    } catch (e) { $('dsum').textContent = 'Не вдалося завантажити графік: ' + e.message; }
+  }
+  function drawChart(hist, day) {
+    const T = (hist && hist.title) || [], R = ((hist && hist.dataList) || []).slice().reverse();
+    const k = n => T.indexOf(n);
+    const iS = k('Battery State of Charge'), iGV = k('R-phase Grid Voltage'), iGP = k('R-phase Grid Meter Power'), iIP = k('R-phase Inverter Power');
+    const x0 = new Date(day + 'T00:00:00').getTime(), x1 = x0 + 864e5;
+    const soc = [], load = [], grid = [], bands = [];
+    let bs = null, prevT = null, minSoc = 101, maxLoad = 0, offMin = 0;
+    R.forEach(r => {
+      const t = ts(r[0]);
+      if (prevT && t - prevT > 16 * 60000) { [soc, load, grid].forEach(a => a.push({x: t - 1, y: null})); }
+      const gp = Number(r[iGP]) || 0, ip = Number(r[iIP]) || 0, gv = Number(r[iGV]) || 0, sc = Number(r[iS]);
+      const ld = Math.max(0, ip - gp);
+      soc.push({x: t, y: sc}); load.push({x: t, y: ld}); grid.push({x: t, y: Math.max(0, -gp)});
+      minSoc = Math.min(minSoc, sc); maxLoad = Math.max(maxLoad, ld);
+      const off = gv < 50;
+      if (off && bs === null) bs = t;
+      if (!off && bs !== null) { bands.push([bs, t]); bs = null; }
+      prevT = t;
+    });
+    if (bs !== null) bands.push([bs, chartDay ? Math.min(x1, prevT + 5 * 60000) : Date.now()]);
+    bands.forEach(b => { offMin += (b[1] - b[0]) / 60000; });
+
+    const cSoc = cssv('--batt'), cLoad = cssv('--warn'), cGrid = cssv('--ok'), cOff = cssv('--off'), ink = cssv('--mute'), line = cssv('--line');
+    $('lgSoc').style.background = cSoc; $('lgLoad').style.background = cLoad; $('lgGrid').style.background = cGrid; $('lgOff').style.background = alpha(cOff, .25);
+
+    const sum = [];
+    if (R.length) {
+      sum.push(bands.length ? 'Без мережі: <b>' + bands.map(b => hm(b[0]) + '–' + (!chartDay && b[1] >= Date.now() - 60000 ? 'зараз' : hm(b[1]))).join(', ') + '</b> (' + dur(offMin) + ')' : 'Мережа була <b>весь день</b>');
+      sum.push('Мін. SoC <b>' + nf(minSoc) + '%</b>');
+      sum.push('Пік навантаження <b>' + nf(maxLoad) + ' Вт</b>');
+    } else sum.push('За цей день даних немає');
+    $('dsum').innerHTML = sum.map(x => '<span>' + x + '</span>').join('');
+
+    const bandsPlugin = {id: 'offBands', beforeDatasetsDraw(c) {
+      const {ctx, chartArea: a, scales: {x}} = c; ctx.save(); ctx.fillStyle = alpha(cOff, .14);
+      bands.forEach(([s0, e0]) => { const p1 = Math.max(a.left, x.getPixelForValue(s0)), p2_ = Math.min(a.right, x.getPixelForValue(e0)); if (p2_ > p1) ctx.fillRect(p1, a.top, p2_ - p1, a.bottom - a.top); });
+      ctx.restore();
+    }};
+    const cfg = {
+      type: 'line',
+      data: {datasets: [
+        {label: 'SoC', data: soc, yAxisID: 'y1', borderColor: cSoc, borderWidth: 2.4, pointRadius: 0, tension: .25, spanGaps: false},
+        {label: 'Навантаження', data: load, yAxisID: 'y', borderColor: cLoad, backgroundColor: alpha(cLoad, .14), fill: 'origin', borderWidth: 1.4, pointRadius: 0, tension: .2, spanGaps: false},
+        {label: 'З мережі', data: grid, yAxisID: 'y', borderColor: cGrid, borderWidth: 1.4, borderDash: [4, 3], pointRadius: 0, tension: .2, spanGaps: false}
+      ]},
+      options: {
+        animation: false, maintainAspectRatio: false, interaction: {mode: 'index', intersect: false},
+        scales: {
+          x: {type: 'linear', min: x0, max: x1, grid: {color: line}, border: {display: false},
+              afterBuildTicks: ax => { ax.ticks = Array.from({length: 9}, (_, i) => ({value: x0 + i * 3 * 3600e3})); },
+              ticks: {color: ink, maxRotation: 0, callback: v => v >= x1 ? '24:00' : hm(v)}},
+          y: {position: 'left', beginAtZero: true, grid: {color: line}, border: {display: false}, ticks: {color: ink, maxTicksLimit: 6, callback: v => v >= 1000 ? nf(v / 1000, 1) + 'к' : v}},
+          y1: {position: 'right', min: 0, max: 100, grid: {display: false}, border: {display: false}, ticks: {color: ink, stepSize: 25, callback: v => v + '%'}}
+        },
+        plugins: {legend: {display: false}, tooltip: {callbacks: {
+          title: it => hm(it[0].parsed.x),
+          label: it => it.dataset.yAxisID === 'y1' ? ' SoC ' + nf(it.parsed.y) + '%' : ' ' + it.dataset.label + ' ' + nf(it.parsed.y) + ' Вт'
+        }}}
+      },
+      plugins: [bandsPlugin]
+    };
+    if (chart) chart.destroy();
+    chart = new Chart($('chart'), cfg);
+  }
+  $('dPrev').addEventListener('click', () => shiftDay(-1));
+  $('dNext').addEventListener('click', () => shiftDay(1));
+
   function token() {
     for (const w of [window.opener, window]) {
       try {
@@ -283,6 +405,7 @@ footer a{color:inherit}
       if (bad) throw bad.reason;
       const v = r.map(x => x.status === 'fulfilled' ? x.value : null);
       render(v[0], v[1], v[2], v[3], v[4], v[5]);
+      if (!chartDay) loadChart(v[5]);
       $('note').style.display = 'none';
     } catch (e) {
       const n = $('note');
