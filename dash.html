@@ -141,21 +141,6 @@ footer a{color:inherit}
     </div>
   </section>
 
-  <section class="card" style="margin-top:12px">
-    <div class="chhead">
-      <h2>Графік за добу</h2>
-      <div class="dnav"><button id="dPrev" title="Попередній день">‹</button><span id="dLbl">Сьогодні</span><button id="dNext" title="Наступний день">›</button></div>
-    </div>
-    <div class="legend">
-      <span><i id="lgSoc"></i>SoC, %</span>
-      <span><i id="lgLoad"></i>Навантаження, Вт</span>
-      <span><i id="lgGrid"></i>З мережі, Вт</span>
-      <span><i class="blk" id="lgOff"></i>Без мережі</span>
-    </div>
-    <div class="chbox"><canvas id="chart"></canvas></div>
-    <div class="dsum" id="dsum"></div>
-  </section>
-
   <div class="grid">
     <section class="card"><h2>Статуси</h2><dl id="stat"></dl></section>
     <section class="card"><h2>Аварії та попередження</h2><ul class="fl" id="faults"></ul></section>
@@ -173,6 +158,20 @@ footer a{color:inherit}
       </div>
     </section>
   </div>
+  <section class="card" style="margin-top:12px">
+    <div class="chhead">
+      <h2>Графік за добу</h2>
+      <div class="dnav"><button id="dPrev" title="Попередній день">‹</button><span id="dLbl">Сьогодні</span><button id="dNext" title="Наступний день">›</button></div>
+    </div>
+    <div class="legend">
+      <span><i id="lgSoc"></i>SoC, %</span>
+      <span><i id="lgLoad"></i>Навантаження, Вт</span>
+      <span><i id="lgGrid"></i>З мережі, Вт</span>
+      <span><i class="blk" id="lgOff"></i>Без мережі</span>
+    </div>
+    <div class="chbox"><canvas id="chart"></canvas></div>
+    <div class="dsum" id="dsum"></div>
+  </section>
   <footer><span id="dev"></span><a href="https://sync.ksdatacloud.com/" target="_blank" rel="noopener">Портал KSTAR →</a></footer>
 </div>
 
