@@ -81,6 +81,23 @@ ul.fl time{color:var(--mute);font-size:12px;white-space:nowrap}
 .pack .pv{font-weight:700;font-size:18px;text-align:right;min-width:50px}
 .pack .meta{grid-column:2/-1;color:var(--mute);font-size:12px}
 .foot{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+.span2{grid-column:1/-1}
+table.en{width:100%;border-collapse:collapse;font-size:14px}
+table.en th{font-size:11px;font-weight:600;color:var(--mute);text-transform:uppercase;letter-spacing:.05em;text-align:right;padding:0 0 8px 8px}
+table.en th:first-child,table.en td:first-child{text-align:left;padding-left:0}
+table.en td{text-align:right;padding:8px 0 8px 8px;border-top:1px solid var(--line);font-weight:600;white-space:nowrap}
+table.en td:first-child{font-weight:500;color:var(--mute);white-space:normal}
+table.en td small{color:var(--mute);font-weight:500;font-size:11px;margin-left:2px}
+.res{display:grid;grid-template-columns:1fr;gap:16px}
+@media (min-width:760px){.res{grid-template-columns:1.2fr 1fr}}
+.cyc b{font-size:34px;font-weight:800;letter-spacing:-.02em}
+.cyc em{font-style:normal;color:var(--mute);font-size:13px}
+.cbar{height:10px;border-radius:6px;background:color-mix(in srgb,var(--ok) 15%,transparent);position:relative;overflow:hidden;margin:10px 0 4px}
+.cbar i{position:absolute;inset:0 auto 0 0;background:var(--ok);border-radius:6px;min-width:3px}
+#nt{all:unset;cursor:pointer;height:40px;padding:0 12px;border-radius:12px;display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);background:var(--card);font-size:13px;font-weight:600;color:var(--mute)}
+@media (max-width:559px){#nt .lbl{display:none}#nt{padding:0;width:40px;justify-content:center}}
+#nt.on{color:var(--ok);border-color:color-mix(in srgb,var(--ok) 40%,transparent)}
+.hbtn{display:flex;gap:8px}
 .kv{display:grid;grid-template-columns:repeat(2,1fr);gap:14px 16px}
 .kv label{display:block;color:var(--mute);font-size:12px}
 .kv b{font-size:20px;font-weight:700}
@@ -92,7 +109,7 @@ footer a{color:inherit}
 <div class="wrap">
   <header>
     <div><h1 id="name">KSTAR</h1><div class="upd" id="upd">Завантаження…</div></div>
-    <button id="rf" title="Оновити">↻</button>
+    <div class="hbtn"><button id="nt" title="Сповіщення при зміні стану мережі та заряду">🔕 Сповіщення</button><button id="rf" title="Оновити">↻</button></div>
   </header>
   <div class="note" id="note"></div>
 
@@ -114,13 +131,17 @@ footer a{color:inherit}
   <div class="grid">
     <section class="card"><h2>Статуси</h2><dl id="stat"></dl></section>
     <section class="card"><h2>Аварії та попередження</h2><ul class="fl" id="faults"></ul></section>
+    <section class="card"><h2>Мережа і вихід інвертора</h2><dl id="elec"></dl></section>
     <section class="card"><h2>Батарейні модулі</h2><div id="packs"></div><div class="foot" id="packFoot"></div></section>
-    <section class="card"><h2>Сьогодні</h2>
-      <div class="kv">
-        <div><label>Спожито будинком</label><b id="dLoad">–</b></div>
-        <div><label>З мережі</label><b id="dImp">–</b></div>
-        <div><label>Заряд батареї</label><b id="dChg">–</b></div>
-        <div><label>Розряд батареї</label><b id="dDis">–</b></div>
+    <section class="card span2"><h2>Енергія, кВт·год</h2>
+      <table class="en"><thead><tr><th></th><th>Сьогодні</th><th>Місяць</th><th>Рік</th><th>Всього</th></tr></thead><tbody id="energy"></tbody></table>
+    </section>
+    <section class="card span2"><h2>Ресурс батареї</h2>
+      <div class="res">
+        <div class="cyc"><b id="cyc">–</b> <em>еквівалентних повних циклів</em>
+          <div class="cbar"><i id="cycBar" style="width:0"></i></div>
+          <em id="cycTxt"></em></div>
+        <dl id="resDl"></dl>
       </div>
     </section>
   </div>
@@ -133,6 +154,7 @@ footer a{color:inherit}
   const BATT_KWH = 10.2;  // ємність батареї, кВт·год
   const MIN_SOC = 10;     // до якого рівня рахувати запас, %
   const REFRESH_S = 60;
+  const CYCLE_LIFE = 6000; // умовний ресурс LFP, циклів (уточніть за паспортом BluE-Pack)
 
   const BASE = 'https://sync.ksdatacloud.com/api';
   const TR = {
@@ -167,6 +189,52 @@ footer a{color:inherit}
   const hm = t => { const d = new Date(t); return p2(d.getHours()) + ':' + p2(d.getMinutes()); };
   function dur(min) { min = Math.max(0, Math.round(min)); const h = Math.floor(min / 60); return h ? h + ' год ' + (min % 60) + ' хв' : min + ' хв'; }
   function ago(min) { return min < 1 ? 'щойно' : min < 60 ? Math.round(min) + ' хв тому' : dur(min) + ' тому'; }
+
+  const kyivDate = () => new Intl.DateTimeFormat('sv-SE', {timeZone: 'Europe/Kiev'}).format(new Date());
+  const LS = {get(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }, set(k, v) { try { localStorage.setItem(k, v); } catch (e) {} }};
+
+  // ---- сповіщення ----
+  let notifyOn = LS.get('kstarNotify') === '1' && window.Notification && Notification.permission === 'granted';
+  let prev = null, actx = null;
+  function paintNt() { const b = $('nt'); b.classList.toggle('on', notifyOn); b.innerHTML = (notifyOn ? '🔔' : '🔕') + '<span class="lbl"> Сповіщення</span>'; }
+  function beep(up) {
+    try {
+      actx = actx || new (window.AudioContext || window.webkitAudioContext)();
+      [0, 0.22].forEach((d, i) => {
+        const o = actx.createOscillator(), g = actx.createGain();
+        o.frequency.value = up ? (i ? 880 : 660) : (i ? 440 : 660);
+        g.gain.setValueAtTime(0.0001, actx.currentTime + d);
+        g.gain.exponentialRampToValueAtTime(0.25, actx.currentTime + d + 0.02);
+        g.gain.exponentialRampToValueAtTime(0.0001, actx.currentTime + d + 0.2);
+        o.connect(g).connect(actx.destination); o.start(actx.currentTime + d); o.stop(actx.currentTime + d + 0.22);
+      });
+    } catch (e) {}
+  }
+  function notify(title, body, up) {
+    if (!notifyOn) return;
+    beep(up);
+    try { new Notification(title, {body: body, tag: 'kstar-' + title, requireInteraction: !up}); } catch (e) {}
+  }
+  function checkEvents(c) {
+    if (prev) {
+      const tail = 'SoC ' + c.soc + '% · навантаження ' + c.load + ' Вт';
+      if (prev.grid !== c.grid) c.grid ? notify('🟢 Мережа повернулась', tail, true) : notify('🔴 Зникла мережа', 'Працюємо від батареї. ' + tail, false);
+      if (prev.soc >= 15 && c.soc < 15) notify('🪫 SoC нижче 15%', tail, false);
+      else if (prev.soc >= 30 && c.soc < 30) notify('🔋 SoC нижче 30%', tail, false);
+      if (prev.soc < 95 && c.soc >= 95) notify('🔋 Батарея заряджена', tail, true);
+      if (prev.online && !c.online) notify('📵 Інвертор офлайн', 'Дані не оновлювались понад 10 хв', false);
+      if (!prev.online && c.online) notify('📶 Інвертор знову на зв\'язку', tail, true);
+    }
+    prev = c;
+  }
+  $('nt').addEventListener('click', async () => {
+    if (!window.Notification) { alert('Цей браузер не підтримує сповіщення.'); return; }
+    if (notifyOn) { notifyOn = false; LS.set('kstarNotify', '0'); paintNt(); return; }
+    const p = Notification.permission === 'granted' ? 'granted' : await Notification.requestPermission();
+    notifyOn = p === 'granted'; LS.set('kstarNotify', notifyOn ? '1' : '0'); paintNt();
+    if (notifyOn) { beep(true); new Notification('KSTAR: сповіщення увімкнено', {body: 'Поки ця вкладка відкрита, повідомлю про зміну мережі, SoC 30/15/95% і втрату зв\'язку.'}); }
+  });
+  paintNt();
 
   function token() {
     for (const w of [window.opener, window]) {
@@ -208,12 +276,13 @@ footer a{color:inherit}
         api('/residential/device/detail/navigation/data?collectId=' + id),
         api('/residential/device/detail/overview/version?deviceId=' + id + '&stime=' + t),
         api('/residential/device/detail/overview/realdata/v2?deviceId=' + id + '&stime=' + t),
-        api('/web/fault/list/real', {current: 1, size: 30})
+        api('/web/fault/list/real', {current: 1, size: 30}),
+        api('/residential/history/data/kse/list?deviceId=' + id + '&stime=' + kyivDate())
       ]);
       const bad = r.slice(0, 3).find(x => x.status === 'rejected');
       if (bad) throw bad.reason;
       const v = r.map(x => x.status === 'fulfilled' ? x.value : null);
-      render(v[0], v[1], v[2], v[3], v[4]);
+      render(v[0], v[1], v[2], v[3], v[4], v[5]);
       $('note').style.display = 'none';
     } catch (e) {
       const n = $('note');
@@ -226,7 +295,7 @@ footer a{color:inherit}
     }
   }
 
-  function render(logic, nav, ver, real, faults) {
+  function render(logic, nav, ver, real, faults, hist) {
     const sys = String(ver['System Status'] || ''), inv = String(ver['INV Status'] || ''), dcdc = String(ver['DCDC Status'] || '');
     const island = /island|off.?grid/i.test(sys + ' ' + inv);
     const tData = ts(nav.saveTime), age = (Date.now() - tData) / 60000;
@@ -314,11 +383,52 @@ footer a{color:inherit}
       $('packs').innerHTML = '<div class="empty">Дані модулів недоступні</div>'; $('packFoot').innerHTML = '';
     }
 
-    // сьогодні
-    $('dLoad').innerHTML = K(num(L['Daily Load Energy Consumption']));
-    $('dImp').innerHTML = K(num(G['Daily Energy Consumption Purchase']));
-    $('dChg').innerHTML = K(num(B['Battery Daily Charge Energy']));
-    $('dDis').innerHTML = K(num(B['Battery Daily Discharge Energy']));
+    // мережа і вихід (історія за добу, найновіший запис першим)
+    const HT = (hist && hist.title) || [], HD = (hist && hist.dataList) || [];
+    const hcol = name => HT.indexOf(name);
+    const at = (row, name) => { const i = hcol(name); return row && i >= 0 ? num(row[i]) : null; };
+    const H0 = HD[0];
+    const gv = HD.map(r => at(r, 'R-phase Grid Voltage')).filter(x => x > 50);
+    const unit = (v, u, d) => v == null ? '–' : nf(v, d) + ' ' + u;
+    const eRows = H0 ? [
+      ['Напруга мережі', island ? '<span class="pill off">0 В</span>' : unit(at(H0, 'R-phase Grid Voltage'), 'В', 1),
+        gv.length ? 'сьогодні ' + nf(Math.min(...gv), 0) + '–' + nf(Math.max(...gv), 0) + ' В' : 'сьогодні мережі не було'],
+      ['Частота мережі', island ? '–' : unit(at(H0, 'R-phase Grid Frequency'), 'Гц', 2), ''],
+      ['Потужність з мережі', unit(at(H0, 'R-phase Grid Meter Power'), 'Вт'), ''],
+      ['Вихід інвертора', unit(at(H0, 'R-phase Inverter Voltage'), 'В', 1) + ' · ' + unit(at(H0, 'R-phase Inverter Frequency'), 'Гц', 2),
+        unit(at(H0, 'R-phase Inverter Power'), 'Вт') + ', ' + unit(at(H0, 'R-phase Inverter Current'), 'А', 2)],
+      ['Резервна лінія (Backup)', unit(at(H0, 'R-phase Backup Voltage'), 'В', 1), unit(at(H0, 'R-phase Backup Current'), 'А', 2)],
+      ['Батарея (шина)', unit(at(H0, 'Battery Voltage'), 'В', 2), unit(at(H0, 'Battery Current'), 'А', 1)],
+      ['Запис від', hm(ts(H0[0])), 'дані кожні 5 хв']
+    ] : [];
+    $('elec').innerHTML = eRows.length ? eRows.map(r => '<dt>' + r[0] + '</dt><dd>' + r[1] + (r[2] ? '<small>' + r[2] + '</small>' : '') + '</dd>').join('')
+      : '<dt>Немає даних за сьогодні</dt><dd></dd>';
+
+    // енергія
+    const c = (v, d) => v == null ? '<small>–</small>' : nf(v, d == null ? 1 : d);
+    const en = [
+      ['З мережі', G['Daily Energy Consumption Purchase'], G['Monthly Energy Consumption Purchase'], G['Yearly Energy Consumption Purchase'], G['Total Energy Consumption Purchase']],
+      ['Спожито будинком', L['Daily Load Energy Consumption'], L['Monthly Load Energy Consumption'], L['Yearly Load Energy Consumption'], null],
+      ['Заряд батареї', B['Battery Daily Charge Energy'], null, null, B['Battery Total Charge Energy']],
+      ['Розряд батареї', B['Battery Daily Discharge Energy'], null, null, B['Battery Total Discharge Energy']],
+      ['Сонце', PV['PV Daily Generation'], PV['PV Monthly Generation'], PV['PV Yearly Generation'], PV['PV Total Generation']],
+      ['Віддано в мережу', G['Daily Energy Consumption Sell'], G['Monthly Energy Consumption Sell'], G['Yearly Energy Consumption Sell'], G['Total Energy Consumption Sell']]
+    ];
+    $('energy').innerHTML = en.map(r => '<tr><td>' + r[0] + '</td>' + r.slice(1).map(v => '<td>' + c(num(v)) + '</td>').join('') + '</tr>').join('');
+
+    // ресурс батареї
+    const tChg = num(B['Battery Total Charge Energy']), tDis = num(B['Battery Total Discharge Energy']);
+    const cyc = tDis == null ? null : tDis / BATT_KWH;
+    $('cyc').textContent = cyc == null ? '–' : nf(cyc, cyc < 10 ? 1 : 0);
+    $('cycBar').style.width = cyc == null ? '0' : Math.min(100, cyc / CYCLE_LIFE * 100) + '%';
+    $('cycTxt').textContent = cyc == null ? '' : nf(cyc / CYCLE_LIFE * 100, 2) + '% від умовних ' + nf(CYCLE_LIFE) + ' циклів · ' + nf(tDis, 0) + ' кВт·год / ' + nf(BATT_KWH, 1) + ' кВт·год';
+    const resRows = [
+      ['Заряджено за весь час', tChg == null ? '–' : nf(tChg, 0) + ' кВт·год'],
+      ['Розряджено за весь час', tDis == null ? '–' : nf(tDis, 0) + ' кВт·год'],
+    ].concat(P.map((p, i) => ['Модуль ' + (i + 1) + '<small style="display:block;font-size:11px">заряд / розряд, BMS</small>', nf(num(p['Battery Pack Cumulative Charge Energy']), 0) + ' / ' + nf(num(p['Battery Pack Cumulative Discharge Energy']), 0) + ' кВт·год']));
+    $('resDl').innerHTML = resRows.map(r => '<dt>' + r[0] + '</dt><dd>' + r[1] + '</dd>').join('');
+
+    checkEvents({grid: island ? 0 : 1, soc: Math.round(soc), load: Math.round(load), online: online});
 
     $('dev').textContent = [ver['Inverter Model'], ver['ARM Version'] && 'ARM ' + ver['ARM Version'], ver['DSP Version'] && 'DSP ' + ver['DSP Version'], ver['Battery Name']].filter(Boolean).join(' · ');
   }
