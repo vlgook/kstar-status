@@ -214,7 +214,46 @@ footer a{color:inherit}
   const ts = s => new Date(String(s).replace(' ', 'T')).getTime();
   const dmy = t => { const d = new Date(t); return p2(d.getDate()) + '.' + p2(d.getMonth() + 1); };
   const hm = t => { const d = new Date(t); return p2(d.getHours()) + ':' + p2(d.getMinutes()); };
-  function dur(min) { min = Math.max(0, Math.round(min)); const h = Math.floor(min / 60); return h ? h + ' год ' + (min % 60) + ' хв' : min + ' хв'; }
+  function dur(min) {
+    min = Math.max(0, Math.round(min)); const h = Math.floor(min / 60);
+    if (h >= 24) return Math.floor(h / 24) + ' д ' + (h % 24) + ' год';
+    return h ? h + ' год ' + (min % 60) + ' хв' : min + ' хв';
+  }
+
+  // ---- з якого моменту поточний стан мережі (за 5-хвилинним журналом) ----
+  const histCache = {};
+  function dayShift(day, n) { const d = new Date(day + 'T12:00:00Z'); d.setUTCDate(d.getUTCDate() + n); return d.toISOString().slice(0, 10); }
+  // повертає {t, exact}: t – момент зміни стану; exact=false, якщо зміни не знайдено в межах MAX днів
+  async function gridSince(off, histToday, tData) {
+    const MAX = 3;
+    let day = kyivDate(), hist = histToday, oldest = null;
+    for (let i = 0; i <= MAX; i++) {
+      if (i) {
+        day = dayShift(day, -1);
+        hist = histCache[day] || (histCache[day] = await api('/residential/history/data/kse/list?deviceId=' + ST.cid + '&stime=' + day).catch(() => null));
+      }
+      const T = (hist && hist.title) || [], D = (hist && hist.dataList) || [], gi = T.indexOf('R-phase Grid Voltage');
+      if (gi < 0) continue;
+      for (let j = 0; j < D.length; j++) {
+        const rowOff = (Number(D[j][gi]) || 0) < 50;
+        if (rowOff !== off) {
+          // найновіший запис уже в іншому стані: перемикання сталося щойно
+          return {t: oldest == null ? tData : oldest, exact: true};
+        }
+        oldest = ts(D[j][0]);
+      }
+    }
+    return {t: oldest, exact: false};
+  }
+  async function updateSince(off, hist, tData) {
+    try {
+      const r = await gridSince(off, hist, tData);
+      if (r.t == null) return;
+      const today = new Date(r.t).toDateString() === new Date().toDateString();
+      const when = (today ? '' : dmy(r.t) + ', ') + hm(r.t);
+      $('stSub').textContent = r.exact ? 'з ' + when + ' · ' + dur((Date.now() - r.t) / 60000) : 'понад ' + dur((Date.now() - r.t) / 60000) + ' (з ' + when + ' або раніше)';
+    } catch (e) {}
+  }
   function ago(min) { return min < 1 ? 'щойно' : min < 60 ? Math.round(min) + ' хв тому' : dur(min) + ' тому'; }
 
   const kyivDate = () => new Intl.DateTimeFormat('sv-SE', {timeZone: 'Europe/Kiev'}).format(new Date());
@@ -403,7 +442,8 @@ footer a{color:inherit}
       const bad = r.slice(0, 3).find(x => x.status === 'rejected');
       if (bad) throw bad.reason;
       const v = r.map(x => x.status === 'fulfilled' ? x.value : null);
-      render(v[0], v[1], v[2], v[3], v[4], v[5]);
+      const rs = render(v[0], v[1], v[2], v[3], v[4], v[5]);
+      updateSince(rs.island, v[5], rs.tData);
       if (!chartDay) loadChart(v[5]);
       $('note').style.display = 'none';
     } catch (e) {
@@ -434,7 +474,10 @@ footer a{color:inherit}
     st.className = 'state ' + (island ? 'off' : 'on');
     $('stTxt').textContent = island ? 'Мережі немає' : 'Мережа є';
     const gridF = FL.filter(f => /grid/i.test(f.faultMessage || '')).map(f => ts(f.saveTime)).sort();
-    $('stSub').textContent = island && gridF.length ? dur((Date.now() - gridF[0]) / 60000) + ' · з ' + hm(gridF[0]) : '';
+    if (!$('stSub').textContent || $('stSub').dataset.st !== String(island)) {
+      $('stSub').textContent = island && gridF.length ? 'з ' + hm(gridF[0]) + ' · ' + dur((Date.now() - gridF[0]) / 60000) : '';
+      $('stSub').dataset.st = String(island);
+    }
 
     // SoC + запас
     const col = soc < 15 ? 'var(--off)' : soc < 30 ? 'var(--warn)' : 'var(--batt)';
@@ -551,6 +594,7 @@ footer a{color:inherit}
     $('resDl').innerHTML = resRows.map(r => '<dt>' + r[0] + '</dt><dd>' + r[1] + '</dd>').join('');
 
     checkEvents({grid: island ? 0 : 1, soc: Math.round(soc), load: Math.round(load), online: online});
+    return {island: island, tData: tData};
 
     $('dev').textContent = [ver['Inverter Model'], ver['ARM Version'] && 'ARM ' + ver['ARM Version'], ver['DSP Version'] && 'DSP ' + ver['DSP Version'], ver['Battery Name']].filter(Boolean).join(' · ');
   }
