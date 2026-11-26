@@ -245,9 +245,10 @@ footer a{color:inherit}
     }
     return {t: oldest, exact: false};
   }
-  async function updateSince(off, hist, tData) {
+  async function updateSince(off, hist, tData, alarmStart) {
     try {
-      const r = await gridSince(off, hist, tData);
+      // мережі немає: точний момент з активної тривоги W00/W02/W03 (до секунди)
+      const r = (off && alarmStart) ? {t: alarmStart, exact: true} : await gridSince(off, hist, tData);
       if (r.t == null) return;
       const today = new Date(r.t).toDateString() === new Date().toDateString();
       const when = (today ? '' : dmy(r.t) + ', ') + hm(r.t);
@@ -443,7 +444,7 @@ footer a{color:inherit}
       if (bad) throw bad.reason;
       const v = r.map(x => x.status === 'fulfilled' ? x.value : null);
       const rs = render(v[0], v[1], v[2], v[3], v[4], v[5]);
-      updateSince(rs.island, v[5], rs.tData);
+      updateSince(rs.island, v[5], rs.tData, rs.alarmStart);
       if (!chartDay) loadChart(v[5]);
       $('note').style.display = 'none';
     } catch (e) {
@@ -594,7 +595,7 @@ footer a{color:inherit}
     $('resDl').innerHTML = resRows.map(r => '<dt>' + r[0] + '</dt><dd>' + r[1] + '</dd>').join('');
 
     checkEvents({grid: island ? 0 : 1, soc: Math.round(soc), load: Math.round(load), online: online});
-    return {island: island, tData: tData};
+    return {island: island, tData: tData, alarmStart: gridF.length ? gridF[0] : null};
 
     $('dev').textContent = [ver['Inverter Model'], ver['ARM Version'] && 'ARM ' + ver['ARM Version'], ver['DSP Version'] && 'DSP ' + ver['DSP Version'], ver['Battery Name']].filter(Boolean).join(' · ');
   }
