@@ -1,23 +1,122 @@
-<!DOCTYPE html><html lang="uk"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>KSTAR · закладка</title>
-<style>:root{--bg:#f3f1ec;--card:#fff;--ink:#16181a;--mute:#696d72;--line:#e5e1d8;--acc:#2459d6}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>KSTAR · status page</title>
+<style>
+:root{--bg:#f3f1ec;--card:#fff;--ink:#16181a;--mute:#696d72;--line:#e5e1d8;--acc:#2459d6}
 @media (prefers-color-scheme:dark){:root{--bg:#0c0e10;--card:#15181b;--ink:#eceef0;--mute:#8b9097;--line:#252a2f;--acc:#6a96ff}}
 body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
-.w{max-width:720px;margin:0 auto;padding:24px 16px}h1{font-size:22px;margin:0 0 6px}p{color:var(--mute);margin:0 0 18px}
-.c{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px;margin-bottom:12px}.c h2{font-size:16px;margin:0 0 10px}
-ol{margin:0;padding-left:20px}li{margin:6px 0}
+.w{max-width:720px;margin:0 auto;padding:24px 16px}
+.top{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
+h1{font-size:22px;margin:0 0 6px}
+p{color:var(--mute);margin:0 0 18px}
+.c{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px;margin-bottom:12px}
+.c h2{font-size:16px;margin:0 0 10px}
+ol,ul{margin:0;padding-left:20px}
+li{margin:6px 0}
 a.bm{display:inline-block;margin:10px 0 4px;padding:12px 20px;border-radius:12px;background:var(--acc);color:#fff;font-weight:700;text-decoration:none;cursor:grab}
-textarea{width:100%;height:120px;box-sizing:border-box;font:12px ui-monospace,monospace;border:1px solid var(--line);border-radius:10px;padding:8px;background:var(--bg);color:var(--ink)}
+textarea{width:100%;height:110px;box-sizing:border-box;font:12px ui-monospace,monospace;border:1px solid var(--line);border-radius:10px;padding:8px;background:var(--bg);color:var(--ink)}
 button{margin-top:8px;padding:9px 16px;border-radius:10px;border:1px solid var(--line);background:var(--card);color:var(--ink);font-weight:600;cursor:pointer}
-code{background:var(--bg);padding:1px 6px;border-radius:6px}</style></head><body><div class="w">
-<h1>KSTAR · статус</h1><p>Закладка відкриває компактну сторінку зі статусами вашого інвертора. Працює, коли ви залогінені на sync.ksdatacloud.com.</p>
-<div class="c"><h2>Комп'ютер (Chrome, Edge)</h2><ol>
-<li>Увімкніть панель закладок: <code>Ctrl+Shift+B</code>.</li>
-<li>Перетягніть цю кнопку на панель закладок:<br><a class="bm" href="javascript:(function(){if(location.host!=='sync.ksdatacloud.com'){location.href='https://sync.ksdatacloud.com/';return}var w=window.open('','_blank')||window;fetch('https://vlgook.github.io/kstar-status/dash.html?v='+Date.now(),{cache:'no-store'}).then(function(r){if(!r.ok)throw r.status;return r.text()}).then(function(h){w.document.open();w.document.write(h);w.document.close()}).catch(function(e){w.document.body.innerHTML='&lt;p style=&quot;font:16px sans-serif;padding:20px&quot;>Не вдалося завантажити сторінку з GitHub ('+e+').&lt;/p>'})})()" onclick="alert('Перетягніть кнопку на панель закладок, а не натискайте тут.');return false">⚡ KSTAR статус</a></li>
-<li>Відкрийте <a href="https://sync.ksdatacloud.com/" target="_blank">sync.ksdatacloud.com</a>, увійдіть і натисніть закладку. Статуси відкриються в новій вкладці.</li></ol></div>
-<div class="c"><h2>Android (Chrome)</h2><ol>
-<li>Скопіюйте код нижче.</li>
-<li>Додайте будь-яку сторінку в закладки (☆), потім відредагуйте закладку: назва <code>kstar</code>, у полі адреси вставте скопійований код.</li>
-<li>Відкрийте портал KSTAR, у адресному рядку наберіть <code>kstar</code> і виберіть закладку зі списку (з іконкою зірочки).</li></ol>
-<textarea id="t" readonly>javascript:(function(){if(location.host!=='sync.ksdatacloud.com'){location.href='https://sync.ksdatacloud.com/';return}var w=window.open('','_blank')||window;fetch('https://vlgook.github.io/kstar-status/dash.html?v='+Date.now(),{cache:'no-store'}).then(function(r){if(!r.ok)throw r.status;return r.text()}).then(function(h){w.document.open();w.document.write(h);w.document.close()}).catch(function(e){w.document.body.innerHTML='&lt;p style=&quot;font:16px sans-serif;padding:20px&quot;>Не вдалося завантажити сторінку з GitHub ('+e+').&lt;/p>'})})()</textarea><button onclick="navigator.clipboard.writeText(document.getElementById('t').value).then(()=>this.textContent='Скопійовано ✓')">Копіювати код</button></div>
-<p style="font-size:13px">Сама закладка лише підтягує свіжу версію сторінки з цього репозиторію, тож після оновлень коду перевстановлювати її не треба. Вона не зберігає і не передає пароль чи токен: сторінка використовує сесію порталу, відкриту у вашому браузері. Дані йдуть лише між браузером і sync.ksdatacloud.com.</p>
-</div></body></html>
+#lang{margin:0;min-width:48px;font-weight:700;letter-spacing:.04em}
+code{background:var(--bg);padding:1px 6px;border-radius:6px}
+.small{font-size:13px}
+[data-l]{display:none}
+html[lang="en"] [data-l="en"],html[lang="uk"] [data-l="uk"]{display:revert}
+</style>
+</head>
+<body><div class="w">
+
+<div class="top">
+  <div>
+    <h1>KSTAR · <span data-l="en">status page</span><span data-l="uk">сторінка статусів</span></h1>
+  </div>
+  <button id="lang" title="English / Українська">UA</button>
+</div>
+
+<p data-l="en">A bookmarklet that opens a compact status page for a KSTAR hybrid inverter on top of the KSTAR Sync portal: grid state and outage history, battery runtime, BMS data, energy balance and browser alerts. Works while you are logged in to sync.ksdatacloud.com.</p>
+<p data-l="uk">Закладка відкриває компактну сторінку статусів гібридного інвертора KSTAR поверх порталу KSTAR Sync: стан мережі й історія відключень, запас батареї, дані BMS, енергобаланс і сповіщення в браузері. Працює, коли ви залогінені на sync.ksdatacloud.com.</p>
+
+<div class="c">
+  <h2 data-l="en">Desktop (Chrome, Edge)</h2>
+  <h2 data-l="uk">Комп'ютер (Chrome, Edge)</h2>
+  <ol data-l="en">
+    <li>Show the bookmarks bar: <code>Ctrl+Shift+B</code>.</li>
+    <li>Drag this button to the bookmarks bar:<br><a class="bm" href="javascript:(function(){if(location.host!=='sync.ksdatacloud.com'){location.href='https://sync.ksdatacloud.com/';return}var w=window.open('','_blank')||window;fetch('https://vlgook.github.io/kstar-status/dash.html?v='+Date.now(),{cache:'no-store'}).then(function(r){if(!r.ok)throw r.status;return r.text()}).then(function(h){w.document.open();w.document.write(h);w.document.close()}).catch(function(e){w.document.body.innerHTML='&lt;p style=&quot;font:16px sans-serif;padding:20px&quot;>Could not load the page from GitHub / Не вдалося завантажити сторінку з GitHub ('+e+').&lt;/p>'})})()" onclick="alert('Drag the button to the bookmarks bar instead of clicking it.');return false">⚡ KSTAR status</a></li>
+    <li>Open <a href="https://sync.ksdatacloud.com/" target="_blank">sync.ksdatacloud.com</a>, log in and click the bookmark. The status page opens in a new tab. To open a specific station, click the bookmark while on that station's page.</li>
+  </ol>
+  <ol data-l="uk">
+    <li>Увімкніть панель закладок: <code>Ctrl+Shift+B</code>.</li>
+    <li>Перетягніть цю кнопку на панель закладок:<br><a class="bm" href="javascript:(function(){if(location.host!=='sync.ksdatacloud.com'){location.href='https://sync.ksdatacloud.com/';return}var w=window.open('','_blank')||window;fetch('https://vlgook.github.io/kstar-status/dash.html?v='+Date.now(),{cache:'no-store'}).then(function(r){if(!r.ok)throw r.status;return r.text()}).then(function(h){w.document.open();w.document.write(h);w.document.close()}).catch(function(e){w.document.body.innerHTML='&lt;p style=&quot;font:16px sans-serif;padding:20px&quot;>Could not load the page from GitHub / Не вдалося завантажити сторінку з GitHub ('+e+').&lt;/p>'})})()" onclick="alert('Перетягніть кнопку на панель закладок, а не натискайте тут.');return false">⚡ KSTAR статус</a></li>
+    <li>Відкрийте <a href="https://sync.ksdatacloud.com/" target="_blank">sync.ksdatacloud.com</a>, увійдіть і натисніть закладку. Статуси відкриються в новій вкладці. Щоб відкрити конкретну станцію, натисніть закладку на сторінці цієї станції.</li>
+  </ol>
+</div>
+
+<div class="c">
+  <h2>Android (Chrome)</h2>
+  <ol data-l="en">
+    <li>Copy the code below.</li>
+    <li>Bookmark any page (☆), then edit the bookmark: name it <code>kstar</code> and paste the code into the URL field.</li>
+    <li>Open the KSTAR portal, type <code>kstar</code> in the address bar and pick the bookmark from the list (the one with the star icon).</li>
+  </ol>
+  <ol data-l="uk">
+    <li>Скопіюйте код нижче.</li>
+    <li>Додайте будь-яку сторінку в закладки (☆), потім відредагуйте закладку: назва <code>kstar</code>, у полі адреси вставте скопійований код.</li>
+    <li>Відкрийте портал KSTAR, у адресному рядку наберіть <code>kstar</code> і виберіть закладку зі списку (з іконкою зірочки).</li>
+  </ol>
+  <textarea id="t" readonly>javascript:(function(){if(location.host!=='sync.ksdatacloud.com'){location.href='https://sync.ksdatacloud.com/';return}var w=window.open('','_blank')||window;fetch('https://vlgook.github.io/kstar-status/dash.html?v='+Date.now(),{cache:'no-store'}).then(function(r){if(!r.ok)throw r.status;return r.text()}).then(function(h){w.document.open();w.document.write(h);w.document.close()}).catch(function(e){w.document.body.innerHTML='&lt;p style=&quot;font:16px sans-serif;padding:20px&quot;>Could not load the page from GitHub / Не вдалося завантажити сторінку з GitHub ('+e+').&lt;/p>'})})()</textarea>
+  <button id="copy"><span data-l="en">Copy code</span><span data-l="uk">Копіювати код</span></button>
+</div>
+
+<div class="c">
+  <h2 data-l="en">What the page shows</h2>
+  <h2 data-l="uk">Що показує сторінка</h2>
+  <ul data-l="en">
+    <li>Grid on/off with the exact time of the last change, taken from the inverter alarm log</li>
+    <li>SoC and estimated runtime down to the off-grid discharge limit read from the inverter</li>
+    <li>Outage statistics for 7/14/28 days: a timeline per day and how often each hour is without grid</li>
+    <li>Daily chart of SoC, load and grid import with exact outages and short grid drops; grid voltage quality</li>
+    <li>Per-module BMS data: SOH, cycles, capacity, cell voltage spread and temperatures</li>
+    <li>System self-consumption: battery DC minus inverter AC during outages, plus daily energy balance</li>
+    <li>Live mode (portal Quick Update, ~10 s), firmware update check, browser alerts with sound</li>
+  </ul>
+  <ul data-l="uk">
+    <li>Є чи немає мережі і точний час останньої зміни, за журналом тривог інвертора</li>
+    <li>SoC і запас роботи до межі розряду без мережі, прочитаної з інвертора</li>
+    <li>Статистика відключень за 7/14/28 днів: смуги по днях і як часто немає світла в кожну годину</li>
+    <li>Графік за добу: SoC, навантаження, імпорт, точні відключення й короткі провали; якість напруги мережі</li>
+    <li>Дані BMS по модулях: SOH, цикли, ємність, розкид напруги комірок, температури</li>
+    <li>Власні потреби системи: DC батареї мінус AC інвертора під час відключень і добовий енергобаланс</li>
+    <li>Живий режим (Quick Update порталу, ~10 с), перевірка оновлень прошивки, сповіщення зі звуком</li>
+  </ul>
+</div>
+
+<p class="small" data-l="en">The bookmarklet only loads the latest version of the page from this repository, so there is no need to reinstall it after updates. It does not store or send your password or token: the page uses the portal session already open in your browser, and data flows only between your browser and sync.ksdatacloud.com. Source code and API notes: <a href="https://github.com/vlgook/kstar-status">github.com/vlgook/kstar-status</a>.</p>
+<p class="small" data-l="uk">Закладка лише підтягує свіжу версію сторінки з цього репозиторію, тож після оновлень коду перевстановлювати її не треба. Вона не зберігає і не передає пароль чи токен: сторінка використовує сесію порталу, відкриту у вашому браузері, і дані йдуть лише між браузером і sync.ksdatacloud.com. Код і опис API: <a href="https://github.com/vlgook/kstar-status">github.com/vlgook/kstar-status</a>.</p>
+
+</div>
+<script>
+(function () {
+  var lang;
+  try { lang = localStorage.getItem('kstarLang'); } catch (e) {}
+  if (lang !== 'uk' && lang !== 'en') lang = /^uk/i.test(navigator.language || '') ? 'uk' : 'en';
+  function apply() {
+    document.documentElement.lang = lang;
+    document.getElementById('lang').textContent = lang === 'uk' ? 'EN' : 'UA';
+    document.title = lang === 'uk' ? 'KSTAR · сторінка статусів' : 'KSTAR · status page';
+  }
+  document.getElementById('lang').addEventListener('click', function () {
+    lang = lang === 'uk' ? 'en' : 'uk';
+    try { localStorage.setItem('kstarLang', lang); } catch (e) {}
+    apply();
+  });
+  document.getElementById('copy').addEventListener('click', function () {
+    var b = this;
+    navigator.clipboard.writeText(document.getElementById('t').value).then(function () { b.textContent = lang === 'uk' ? 'Скопійовано ✓' : 'Copied ✓'; });
+  });
+  apply();
+})();
+</script>
+</body>
+</html>

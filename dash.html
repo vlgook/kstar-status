@@ -113,6 +113,7 @@ table.en td small{color:var(--mute);font-weight:500;font-size:11px;margin-left:2
 .dsum b{color:var(--ink);font-weight:700}
 .dsum small{font-size:11px;opacity:.8}
 #lv{all:unset;cursor:pointer;height:40px;padding:0 12px;border-radius:12px;display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);background:var(--card);font-size:13px;font-weight:600;color:var(--mute)}
+#lang{all:unset;cursor:pointer;height:40px;min-width:40px;padding:0 10px;box-sizing:border-box;border-radius:12px;display:inline-flex;align-items:center;justify-content:center;border:1px solid var(--line);background:var(--card);font-size:13px;font-weight:700;color:var(--mute);letter-spacing:.04em}
 #lv.on{color:var(--batt);border-color:color-mix(in srgb,var(--batt) 45%,transparent);box-shadow:0 0 0 3px color-mix(in srgb,var(--batt) 12%,transparent)}
 @media (max-width:559px){#lv .lbl{display:none}#lv{padding:0;width:40px;justify-content:center}}
 .chV{position:relative;height:150px;margin-top:14px}
@@ -151,8 +152,8 @@ footer a{color:inherit}
 <body>
 <div class="wrap">
   <header>
-    <div><h1 id="name">KSTAR</h1><div class="upd" id="upd">Завантаження…</div></div>
-    <div class="hbtn"><button id="lv" title="Швидке оновлення: даталогер шле дані кожні ~10 с (вимкнеться саме через 10 хв)">⚡<span class="lbl"> Живий режим</span></button><button id="nt" title="Сповіщення при зміні стану мережі та заряду">🔕 Сповіщення</button><button id="rf" title="Оновити">↻</button></div>
+    <div><h1 id="name">KSTAR</h1><div class="upd" id="upd" data-i="loading">Завантаження…</div></div>
+    <div class="hbtn"><button id="lang" title="Українська / English">EN</button><button id="lv" data-it="liveTip">⚡<span class="lbl" data-i="liveLbl"> Живий режим</span></button><button id="nt" data-it="notifTip">🔕 Сповіщення</button><button id="rf" data-it="refreshTip">↻</button></div>
   </header>
   <div class="note" id="note"></div>
 
@@ -164,22 +165,22 @@ footer a{color:inherit}
     </div>
     <div class="bar"><i id="socBar" style="width:0"></i><span class="mk" style="left:15%"></span><span class="mk" style="left:30%"></span></div>
     <div class="flows">
-      <div class="flow"><label>Навантаження</label><b id="fLoad">–</b><div class="sub" id="fLoadSub">будинок</div></div>
-      <div class="flow"><label>Батарея</label><b id="fBatt">–</b><div class="sub" id="fBattSub">&nbsp;</div></div>
-      <div class="flow"><label>Мережа</label><b id="fGrid">–</b><div class="sub" id="fGridSub">&nbsp;</div></div>
-      <div class="flow"><label>Сонце</label><b id="fPv">–</b><div class="sub" id="fPvSub">&nbsp;</div></div>
+      <div class="flow"><label data-i="fLoad">Навантаження</label><b id="fLoad">–</b><div class="sub" id="fLoadSub">будинок</div></div>
+      <div class="flow"><label data-i="fBatt">Батарея</label><b id="fBatt">–</b><div class="sub" id="fBattSub">&nbsp;</div></div>
+      <div class="flow"><label data-i="fGrid">Мережа</label><b id="fGrid">–</b><div class="sub" id="fGridSub">&nbsp;</div></div>
+      <div class="flow"><label data-i="fPv">Сонце</label><b id="fPv">–</b><div class="sub" id="fPvSub">&nbsp;</div></div>
     </div>
   </section>
 
   <div class="grid">
-    <section class="card"><h2>Статуси</h2><dl id="stat"></dl></section>
-    <section class="card"><h2>Мережа і вихід інвертора</h2><dl id="elec"></dl></section>
-    <section class="card"><h2>Аварії та попередження</h2><ul class="fl" id="faults"></ul></section>
-    <section class="card"><h2>Батарейні модулі</h2><div id="packs"></div><div class="foot" id="packFoot"></div></section>
-    <section class="card span2"><h2>Енергія, кВт·год</h2>
-      <table class="en"><thead><tr><th></th><th>Сьогодні</th><th>Місяць</th><th>Рік</th><th>Всього</th></tr></thead><tbody id="energy"></tbody></table>
+    <section class="card"><h2 data-i="hStat">Статуси</h2><dl id="stat"></dl></section>
+    <section class="card"><h2 data-i="hElec">Мережа і вихід інвертора</h2><dl id="elec"></dl></section>
+    <section class="card"><h2 data-i="hFaults">Аварії та попередження</h2><ul class="fl" id="faults"></ul></section>
+    <section class="card"><h2 data-i="hPacks">Батарейні модулі</h2><div id="packs"></div><div class="foot" id="packFoot"></div></section>
+    <section class="card span2"><h2 data-i="hEnergy">Енергія, кВт·год</h2>
+      <table class="en"><thead><tr><th></th><th data-i="thToday">Сьогодні</th><th data-i="thMonth">Місяць</th><th data-i="thYear">Рік</th><th data-i="thTotal">Всього</th></tr></thead><tbody id="energy"></tbody></table>
     </section>
-    <section class="card span2"><h2>Ресурс батареї</h2>
+    <section class="card span2"><h2 data-i="hRes">Ресурс батареї</h2>
       <div class="res">
         <div class="cyc"><b id="cyc">–</b> <em id="cycLbl">циклів</em>
           <div class="cbar"><i id="cycBar" style="width:0"></i></div>
@@ -190,12 +191,12 @@ footer a{color:inherit}
   </div>
   <section class="card" style="margin-top:12px">
     <div class="chhead">
-      <h2>Відключення: статистика</h2>
+      <h2 data-i="hOut">Відключення: статистика</h2>
       <div class="seg" id="oSeg"><button data-d="7">7 днів</button><button data-d="14" class="on">14 днів</button><button data-d="28">28 днів</button></div>
     </div>
     <div class="ostats" id="oStats"></div>
     <div class="tl" id="oTl"></div>
-    <div class="subh">Як часто немає світла в цю годину, % днів</div>
+    <div class="subh" data-i="hourShare">Як часто немає світла в цю годину, % днів</div>
     <div class="hist" id="oHist"></div>
     <div class="hax" id="oHax"></div>
     <div class="onote" id="oNote"></div>
@@ -203,21 +204,21 @@ footer a{color:inherit}
 
   <section class="card" style="margin-top:12px">
     <div class="chhead">
-      <h2>Графік за добу</h2>
-      <div class="dnav"><button id="dPrev" title="Попередній день">‹</button><span id="dLbl">Сьогодні</span><button id="dNext" title="Наступний день">›</button></div>
+      <h2 data-i="hDay">Графік за добу</h2>
+      <div class="dnav"><button id="dPrev" data-it="prevDay">‹</button><span id="dLbl">Сьогодні</span><button id="dNext" data-it="nextDay">›</button></div>
     </div>
     <div class="legend">
       <span><i id="lgSoc"></i>SoC, %</span>
-      <span><i id="lgLoad"></i>Навантаження, Вт</span>
-      <span><i id="lgGrid"></i>З мережі, Вт</span>
-      <span><i class="blk" id="lgOff"></i>Без мережі</span>
+      <span><i id="lgLoad"></i><span data-i="lgLoad">Навантаження, Вт</span></span>
+      <span><i id="lgGrid"></i><span data-i="lgGrid">З мережі, Вт</span></span>
+      <span><i class="blk" id="lgOff"></i><span data-i="lgOff">Без мережі</span></span>
     </div>
     <div class="chbox"><canvas id="chart"></canvas></div>
     <div class="dsum" id="dsum"></div>
-    <div class="subh">Якість мережі: напруга, В <span style="font-weight:500">(пунктир – межі ±10% від 230 В)</span></div>
+    <div class="subh" data-ih="vq">Якість мережі: напруга, В <span style="font-weight:500">(пунктир – межі ±10% від 230 В)</span></div>
     <div class="chV"><canvas id="chartV"></canvas></div>
   </section>
-  <footer><span id="dev"></span><a href="https://sync.ksdatacloud.com/" target="_blank" rel="noopener">Портал KSTAR →</a></footer>
+  <footer><span id="dev"></span><a href="https://sync.ksdatacloud.com/" target="_blank" rel="noopener" data-i="portal">Портал KSTAR →</a></footer>
 </div>
 
 <script>
@@ -243,27 +244,147 @@ footer a{color:inherit}
     'Grid Loss': 'Втрата мережі', 'No Grid': 'Немає мережі', 'Battery Low': 'Низький заряд батареї',
     'Battery Under Voltage': 'Низька напруга батареї', 'Over Temperature': 'Перегрів', 'Overload': 'Перевантаження'
   };
+
+  // ---- мова інтерфейсу: UA / EN ----
+  const I18N = {
+    uk: {
+      loading: 'Завантаження…', liveLbl: ' Живий режим', liveTip: 'Швидке оновлення: даталогер шле дані кожні ~10 с (вимкнеться саме через 10 хв)',
+      notif: 'Сповіщення', notifTip: 'Сповіщення при зміні стану мережі та заряду', refreshTip: 'Оновити',
+      fLoad: 'Навантаження', fBatt: 'Батарея', fGrid: 'Мережа', fPv: 'Сонце',
+      hStat: 'Статуси', hElec: 'Мережа і вихід інвертора', hFaults: 'Аварії та попередження', hPacks: 'Батарейні модулі',
+      hEnergy: 'Енергія, кВт·год', hRes: 'Ресурс батареї', hOut: 'Відключення: статистика', hDay: 'Графік за добу',
+      thToday: 'Сьогодні', thMonth: 'Місяць', thYear: 'Рік', thTotal: 'Всього', days: n => n + ' днів',
+      hourShare: 'Як часто немає світла в цю годину, % днів', prevDay: 'Попередній день', nextDay: 'Наступний день', today: 'Сьогодні',
+      lgLoad: 'Навантаження, Вт', lgGrid: 'З мережі, Вт', lgOff: 'Без мережі',
+      vq: 'Якість мережі: напруга, В <span style="font-weight:500">(пунктир – межі ±10% від 230 В)</span>', portal: 'Портал KSTAR →',
+      onlyBm: 'Ця сторінка працює лише через закладку на порталі KSTAR. <a href="./" style="color:inherit">Як встановити закладку</a>',
+      W: 'Вт', kW: 'кВт', kWh: 'кВт·год', V: 'В', A: 'А', Hz: 'Гц', mV: 'мВ', Ah: 'А·год', k: 'к',
+      dD: 'д', dH: 'год', dM: 'хв', dS: 'с', justNow: 'щойно', ago: x => x + ' тому',
+      since: (w, d) => 'з ' + w + ' · ' + d, sinceOver: (d, w) => 'понад ' + d + ' (з ' + w + ' або раніше)',
+      nTail: (s, l) => 'SoC ' + s + '% · навантаження ' + l + ' Вт', nGridBack: '🟢 Мережа повернулась', nGridLost: '🔴 Зникла мережа',
+      nOnBatt: 'Працюємо від батареї. ', nSoc15: '🪫 SoC нижче 15%', nSoc30: '🔋 SoC нижче 30%', nFull: '🔋 Батарея заряджена',
+      nOff: '📵 Інвертор офлайн', nOffBody: 'Дані не оновлювались понад 10 хв', nOn: '📶 Інвертор знову на зв\'язку',
+      nNoSupport: 'Цей браузер не підтримує сповіщення.', nEnabled: 'KSTAR: сповіщення увімкнено',
+      nEnabledBody: 'Поки ця вкладка відкрита, повідомлю про зміну мережі, SoC 30/15/95% і втрату зв\'язку.',
+      DAYS: ['неділя', 'понеділок', 'вівторок', 'середа', 'четвер', 'пʼятниця', 'субота'], DOW: ['Нд', 'Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб'],
+      now: 'зараз', allDay: 'Мережа була <b>весь день</b>', offList: (l, d) => 'Без мережі: <b>' + l + '</b> (' + d + ')',
+      glitches: (n, hadLong, list, mx) => (hadLong ? 'і ' : 'Мережа блимала: ') + '<b>' + n + ' ' + (n === 1 ? 'короткий провал' : n < 5 ? 'короткі провали' : 'коротких провалів') + '</b> (' + list + '; до ' + mx + ')',
+      byAlarms: 'за журналом тривог', by5: 'за 5-хв записами', minSoc: 'Мін. SoC', peak: 'Пік навантаження', noDay: 'За цей день даних немає',
+      chartErr: 'Не вдалося завантажити графік: ', dsLoad: 'Навантаження', dsGrid: 'З мережі', vGrid: 'Мережа', vInv: 'Вихід інвертора', none: 'немає',
+      liveUpd: (t, m) => '⚡ живий режим · ' + t + ' · ще ' + m + ' хв', liveErr: 'Портал не ввімкнув швидке оновлення: ',
+      noCover: 'Журнал тривог не покриває весь період.', sCount: 'Відключень', sTotal: 'Без світла', sAvg: 'В середньому', perDay: '/добу',
+      sMax: 'Найдовше', sShort: 'Коротких провалів', pctDays: p => p + '% днів',
+      oftenOff: r => 'Найчастіше світла немає: <b>' + r + '</b> (у половині днів і частіше)',
+      noPattern: (r, p) => 'Сталого графіка не видно. Найчастіше вимикають о <b>' + r + '</b> (' + p + '% днів)', noOut: 'Відключень за період не було',
+      noStation: 'Станцію не знайдено', fetchErr: 'Не вдалося отримати дані: ',
+      authNote: 'Сесія порталу закінчилась. <a href="https://sync.ksdatacloud.com/" target="_blank" style="color:inherit">Увійдіть на портал</a>, потім натисніть ↻.',
+      cycles: 'циклів', cells: 'комірки', balancing: 'балансування', fwUpd: 'є оновлення', fwOk: 'актуальна',
+      updLine: (t, a, s) => 'Дані інвертора ' + t + ' · ' + a + ' · авто кожні ' + s + ' с',
+      gridOff: 'Мережі немає', gridOn: 'Мережа є', reserve: 'запас',
+      autoTxt: (m, inv, l, k) => 'запас до ' + m + '%' + (inv ? ' (межа з інвертора)' : '') + ' при ' + l + ' Вт (' + k + ' кВт·год)',
+      dis: 'розряд', chg: 'заряд', island: 'острівний режим', importing: 'імпорт', connected: 'підключено', pvToday: k => 'сьогодні ' + k + ' кВт·год',
+      rSys: 'Система', rInv: 'Інвертор', rMode: 'Режим роботи', rConn: 'Зв\'язок', rFw: 'Прошивка',
+      online: 'онлайн', offline: 'офлайн', dataFlow: 'дані надходять', noData10: 'даних немає понад 10 хв', portalWrong: '; портал помилково показує «офлайн»',
+      noFaults: 'Активних аварій немає', module: 'Модуль', pDis: 'розряд', pChg: 'заряд', pZero: 'струм 0 A',
+      dSoc: 'Різниця SoC', dVolt: 'Різниця напруги', cellSpread: 'Розкид комірок до', bmsWarn: 'BMS: попередження', bmsOk: 'BMS: без попереджень', noPacks: 'Дані модулів недоступні',
+      selfToday: n => 'сьогодні, ' + n + ' ' + (n % 10 >= 2 && n % 10 <= 4 && (n % 100 < 12 || n % 100 > 14) ? 'записи' : n % 10 === 1 && n % 100 !== 11 ? 'запис' : 'записів') + ' без мережі',
+      selfFrom: d => 'за відключенням ' + d, house: 'будинок', houseInv: w => 'будинок + ~' + w + ' Вт інвертор',
+      gridV: 'Напруга мережі', todayRange: (a, b) => 'сьогодні ' + a + '–' + b + ' В', noGridToday: 'сьогодні мережі не було',
+      gridF: 'Частота мережі', gridP: 'Потужність з мережі', invOut: 'Вихід інвертора', backup: 'Резервна лінія (Backup)',
+      limit: 'Межа виходу інвертора', nowA: (c, p) => 'зараз ' + c + ' А, ' + p + ' від межі', battBus: 'Батарея (шина)',
+      selfRow: 'Власні потреби системи', nowW: 'зараз', selfFirst: 'порахую під час першого відключення', kwhDay: 'кВт·год/добу', noDataToday: 'Немає даних за сьогодні',
+      eImp: 'З мережі', eLoad: 'Спожито будинком', eChg: 'Заряд батареї', eDis: 'Розряд батареї', ePv: 'Сонце', eExp: 'Віддано в мережу',
+      eSelf: 'Власні потреби системи<small style="display:block;font-size:11px">баланс; місяць і рік без поправки на батарею</small>',
+      cycBms: 'циклів за лічильником BMS', cycEq: 'еквівалентних повних циклів',
+      cycTxt: (p, life) => p + '% від умовних ' + life + ' циклів', cycEnergy: (e, d, k) => ' · за енергією ' + e + ' екв. циклу (' + d + ' / ' + k + ' кВт·год)',
+      charged: 'Заряджено за весь час', discharged: 'Розряджено за весь час', soh: 'Стан (SOH)', sohSrc: 'за BMS модулів'
+    },
+    en: {
+      loading: 'Loading…', liveLbl: ' Live mode', liveTip: 'Quick update: the datalogger reports every ~10 s (turns off by itself after 10 min)',
+      notif: 'Alerts', notifTip: 'Alerts on grid and battery changes', refreshTip: 'Refresh',
+      fLoad: 'Load', fBatt: 'Battery', fGrid: 'Grid', fPv: 'Solar',
+      hStat: 'Status', hElec: 'Grid and inverter output', hFaults: 'Alarms and warnings', hPacks: 'Battery modules',
+      hEnergy: 'Energy, kWh', hRes: 'Battery wear', hOut: 'Outage statistics', hDay: 'Daily chart',
+      thToday: 'Today', thMonth: 'Month', thYear: 'Year', thTotal: 'Total', days: n => n + ' days',
+      hourShare: 'How often the grid is down at this hour, % of days', prevDay: 'Previous day', nextDay: 'Next day', today: 'Today',
+      lgLoad: 'Load, W', lgGrid: 'From grid, W', lgOff: 'Grid down',
+      vq: 'Grid quality: voltage, V <span style="font-weight:500">(dashed lines: ±10% of 230 V)</span>', portal: 'KSTAR portal →',
+      onlyBm: 'This page works only via the bookmarklet on the KSTAR portal. <a href="./" style="color:inherit">How to install it</a>',
+      W: 'W', kW: 'kW', kWh: 'kWh', V: 'V', A: 'A', Hz: 'Hz', mV: 'mV', Ah: 'Ah', k: 'k',
+      dD: 'd', dH: 'h', dM: 'min', dS: 's', justNow: 'just now', ago: x => x + ' ago',
+      since: (w, d) => 'since ' + w + ' · ' + d, sinceOver: (d, w) => 'over ' + d + ' (since ' + w + ' or earlier)',
+      nTail: (s, l) => 'SoC ' + s + '% · load ' + l + ' W', nGridBack: '🟢 Grid is back', nGridLost: '🔴 Grid lost',
+      nOnBatt: 'Running on battery. ', nSoc15: '🪫 SoC below 15%', nSoc30: '🔋 SoC below 30%', nFull: '🔋 Battery charged',
+      nOff: '📵 Inverter offline', nOffBody: 'No data for over 10 min', nOn: '📶 Inverter back online',
+      nNoSupport: 'This browser does not support notifications.', nEnabled: 'KSTAR: alerts enabled',
+      nEnabledBody: 'While this tab is open, you will be alerted on grid changes, SoC 30/15/95% and loss of connection.',
+      DAYS: ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'], DOW: ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'],
+      now: 'now', allDay: 'Grid was on <b>all day</b>', offList: (l, d) => 'Grid down: <b>' + l + '</b> (' + d + ')',
+      glitches: (n, hadLong, list, mx) => (hadLong ? 'and ' : 'Grid flickered: ') + '<b>' + n + ' short drop' + (n === 1 ? '' : 's') + '</b> (' + list + '; up to ' + mx + ')',
+      byAlarms: 'from the alarm log', by5: 'from 5-min records', minSoc: 'Min SoC', peak: 'Peak load', noDay: 'No data for this day',
+      chartErr: 'Could not load the chart: ', dsLoad: 'Load', dsGrid: 'From grid', vGrid: 'Grid', vInv: 'Inverter output', none: 'none',
+      liveUpd: (t, m) => '⚡ live mode · ' + t + ' · ' + m + ' min left', liveErr: 'The portal did not enable quick update: ',
+      noCover: 'The alarm log does not cover the whole period.', sCount: 'Outages', sTotal: 'Without grid', sAvg: 'Average', perDay: '/day',
+      sMax: 'Longest', sShort: 'Short drops', pctDays: p => p + '% of days',
+      oftenOff: r => 'The grid is most often down: <b>' + r + '</b> (on half of the days or more)',
+      noPattern: (r, p) => 'No stable schedule. Outages are most frequent at <b>' + r + '</b> (' + p + '% of days)', noOut: 'No outages in this period',
+      noStation: 'No station found', fetchErr: 'Could not get data: ',
+      authNote: 'The portal session has expired. <a href="https://sync.ksdatacloud.com/" target="_blank" style="color:inherit">Log in to the portal</a>, then press ↻.',
+      cycles: 'cycles', cells: 'cells', balancing: 'balancing', fwUpd: 'update available', fwOk: 'up to date',
+      updLine: (t, a, s) => 'Inverter data ' + t + ' · ' + a + ' · auto every ' + s + ' s',
+      gridOff: 'Grid down', gridOn: 'Grid on', reserve: 'runtime',
+      autoTxt: (m, inv, l, k) => 'runtime down to ' + m + '%' + (inv ? ' (inverter setting)' : '') + ' at ' + l + ' W (' + k + ' kWh)',
+      dis: 'discharging', chg: 'charging', island: 'island mode', importing: 'importing', connected: 'connected', pvToday: k => 'today ' + k + ' kWh',
+      rSys: 'System', rInv: 'Inverter', rMode: 'Operating mode', rConn: 'Connection', rFw: 'Firmware',
+      online: 'online', offline: 'offline', dataFlow: 'data is coming in', noData10: 'no data for over 10 min', portalWrong: '; the portal wrongly shows "offline"',
+      noFaults: 'No active alarms', module: 'Module', pDis: 'discharge', pChg: 'charge', pZero: 'current 0 A',
+      dSoc: 'SoC spread', dVolt: 'Voltage spread', cellSpread: 'Cell spread up to', bmsWarn: 'BMS: warnings', bmsOk: 'BMS: no warnings', noPacks: 'Module data unavailable',
+      selfToday: n => 'today, ' + n + ' record' + (n === 1 ? '' : 's') + ' without grid',
+      selfFrom: d => 'from the outage on ' + d, house: 'house', houseInv: w => 'house + ~' + w + ' W inverter',
+      gridV: 'Grid voltage', todayRange: (a, b) => 'today ' + a + '–' + b + ' V', noGridToday: 'no grid today',
+      gridF: 'Grid frequency', gridP: 'Grid power', invOut: 'Inverter output', backup: 'Backup line',
+      limit: 'Inverter output limit', nowA: (c, p) => 'now ' + c + ' A, ' + p + ' of the limit', battBus: 'Battery (DC bus)',
+      selfRow: 'System self-consumption', nowW: 'now', selfFirst: 'will be calculated during the first outage', kwhDay: 'kWh/day', noDataToday: 'No data for today',
+      eImp: 'From grid', eLoad: 'House consumption', eChg: 'Battery charge', eDis: 'Battery discharge', ePv: 'Solar', eExp: 'Exported to grid',
+      eSelf: 'System self-consumption<small style="display:block;font-size:11px">energy balance; month and year without battery correction</small>',
+      cycBms: 'cycles (BMS counter)', cycEq: 'equivalent full cycles',
+      cycTxt: (p, life) => p + '% of a nominal ' + life + ' cycles', cycEnergy: (e, d, k) => ' · by energy ' + e + ' equivalent cycles (' + d + ' / ' + k + ' kWh)',
+      charged: 'Charged, lifetime', discharged: 'Discharged, lifetime', soh: 'State of health (SOH)', sohSrc: 'from module BMS'
+    }
+  };
+  let LANG = (function () { try { const v = localStorage.getItem('kstarLang'); if (v === 'uk' || v === 'en') return v; } catch (e) {} return /^uk/i.test(navigator.language || '') ? 'uk' : 'en'; })();
+  const L_ = () => I18N[LANG];
+  const t = (k, ...a) => { const v = I18N[LANG][k]; return typeof v === 'function' ? v(...a) : (v == null ? k : v); };
+  function applyStatic() {
+    document.documentElement.lang = LANG === 'uk' ? 'uk' : 'en';
+    document.querySelectorAll('[data-i]').forEach(el => { el.textContent = t(el.dataset.i); });
+    document.querySelectorAll('[data-ih]').forEach(el => { el.innerHTML = t(el.dataset.ih); });
+    document.querySelectorAll('[data-it]').forEach(el => { el.title = t(el.dataset.it); });
+    document.querySelectorAll('#oSeg button').forEach(b => { b.textContent = t('days', b.dataset.d); });
+    const lb = document.getElementById('lang'); if (lb) lb.textContent = LANG === 'uk' ? 'EN' : 'UA';
+  }
+  applyStatic();
   let ST = null, busy = false;
   if (location.origin !== 'https://sync.ksdatacloud.com') {
     document.getElementById('note').style.display = 'block';
-    document.getElementById('note').innerHTML = 'Ця сторінка працює лише через закладку на порталі KSTAR. <a href="./" style="color:inherit">Як встановити закладку</a>';
+    document.getElementById('note').innerHTML = t('onlyBm');
     document.getElementById('upd').textContent = '';
     return;
   }
   const $ = id => document.getElementById(id);
   const p2 = n => String(n).padStart(2, '0');
-  const nf = (v, d) => v == null || isNaN(v) ? '–' : Number(v).toLocaleString('uk-UA', {minimumFractionDigits: d || 0, maximumFractionDigits: d || 0});
-  const W = w => { w = Math.abs(Number(w) || 0); return w >= 1000 ? nf(w / 1000, 2) + '<small>кВт</small>' : nf(w) + '<small>Вт</small>'; };
-  const K = v => v == null ? '–' : nf(v, 1) + '<small>кВт·год</small>';
-  const tr = s => !s ? '–' : (TR[s] ? TR[s] + '<small>' + s + '</small>' : s);
+  const nf = (v, d) => v == null || isNaN(v) ? '–' : Number(v).toLocaleString(LANG === 'uk' ? 'uk-UA' : 'en-GB', {minimumFractionDigits: d || 0, maximumFractionDigits: d || 0});
+  const W = w => { w = Math.abs(Number(w) || 0); return w >= 1000 ? nf(w / 1000, 2) + '<small>' + t('kW') + '</small>' : nf(w) + '<small>' + t('W') + '</small>'; };
+  const K = v => v == null ? '–' : nf(v, 1) + '<small>' + t('kWh') + '</small>';
+  const tr = s => !s ? '–' : (LANG === 'uk' && TR[s] ? TR[s] + '<small>' + s + '</small>' : s);
   const num = v => v === undefined || v === null || v === '' ? null : Number(v);
   const ts = s => new Date(String(s).replace(' ', 'T')).getTime();
   const dmy = t => { const d = new Date(t); return p2(d.getDate()) + '.' + p2(d.getMonth() + 1); };
   const hm = t => { const d = new Date(t); return p2(d.getHours()) + ':' + p2(d.getMinutes()); };
   function dur(min) {
     min = Math.max(0, Math.round(min)); const h = Math.floor(min / 60);
-    if (h >= 24) return Math.floor(h / 24) + ' д ' + (h % 24) + ' год';
-    return h ? h + ' год ' + (min % 60) + ' хв' : min + ' хв';
+    if (h >= 24) return Math.floor(h / 24) + ' ' + t('dD') + ' ' + (h % 24) + ' ' + t('dH');
+    return h ? h + ' ' + t('dH') + ' ' + (min % 60) + ' ' + t('dM') : min + ' ' + t('dM');
   }
 
   // ---- з якого моменту поточний стан мережі (за 5-хвилинним журналом) ----
@@ -308,18 +429,20 @@ footer a{color:inherit}
       if (r.t == null) return;
       const today = new Date(r.t).toDateString() === new Date().toDateString();
       const when = (today ? '' : dmy(r.t) + ', ') + hm(r.t);
-      $('stSub').textContent = r.exact ? 'з ' + when + ' · ' + dur((Date.now() - r.t) / 60000) : 'понад ' + dur((Date.now() - r.t) / 60000) + ' (з ' + when + ' або раніше)';
+      $('stSub').textContent = r.exact ? t('since', when, dur((Date.now() - r.t) / 60000)) : t('sinceOver', dur((Date.now() - r.t) / 60000), when);
     } catch (e) {}
   }
-  function ago(min) { return min < 1 ? 'щойно' : min < 60 ? Math.round(min) + ' хв тому' : dur(min) + ' тому'; }
+  function ago(min) { return min < 1 ? t('justNow') : t('ago', min < 60 ? Math.round(min) + ' ' + t('dM') : dur(min)); }
 
-  const kyivDate = () => new Intl.DateTimeFormat('sv-SE', {timeZone: 'Europe/Kiev'}).format(new Date());
+  const stTz = () => (ST && ST.tz) || 'Europe/Kiev';
+  // дата і час у часовому поясі станції (портал вимагає саме їх)
+  const kyivDate = () => new Intl.DateTimeFormat('sv-SE', {timeZone: stTz()}).format(new Date());
   const LS = {get(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }, set(k, v) { try { localStorage.setItem(k, v); } catch (e) {} }};
 
   // ---- сповіщення ----
   let notifyOn = LS.get('kstarNotify') === '1' && window.Notification && Notification.permission === 'granted';
   let prev = null, actx = null;
-  function paintNt() { const b = $('nt'); b.classList.toggle('on', notifyOn); b.innerHTML = (notifyOn ? '🔔' : '🔕') + '<span class="lbl"> Сповіщення</span>'; }
+  function paintNt() { const b = $('nt'); b.classList.toggle('on', notifyOn); b.innerHTML = (notifyOn ? '🔔' : '🔕') + '<span class="lbl"> ' + t('notif') + '</span>'; }
   function beep(up) {
     try {
       actx = actx || new (window.AudioContext || window.webkitAudioContext)();
@@ -340,28 +463,27 @@ footer a{color:inherit}
   }
   function checkEvents(c) {
     if (prev) {
-      const tail = 'SoC ' + c.soc + '% · навантаження ' + c.load + ' Вт';
-      if (prev.grid !== c.grid) c.grid ? notify('🟢 Мережа повернулась', tail, true) : notify('🔴 Зникла мережа', 'Працюємо від батареї. ' + tail, false);
-      if (prev.soc >= 15 && c.soc < 15) notify('🪫 SoC нижче 15%', tail, false);
-      else if (prev.soc >= 30 && c.soc < 30) notify('🔋 SoC нижче 30%', tail, false);
-      if (prev.soc < 95 && c.soc >= 95) notify('🔋 Батарея заряджена', tail, true);
-      if (prev.online && !c.online) notify('📵 Інвертор офлайн', 'Дані не оновлювались понад 10 хв', false);
-      if (!prev.online && c.online) notify('📶 Інвертор знову на зв\'язку', tail, true);
+      const tail = t('nTail', c.soc, c.load);
+      if (prev.grid !== c.grid) c.grid ? notify(t('nGridBack'), tail, true) : notify(t('nGridLost'), t('nOnBatt') + tail, false);
+      if (prev.soc >= 15 && c.soc < 15) notify(t('nSoc15'), tail, false);
+      else if (prev.soc >= 30 && c.soc < 30) notify(t('nSoc30'), tail, false);
+      if (prev.soc < 95 && c.soc >= 95) notify(t('nFull'), tail, true);
+      if (prev.online && !c.online) notify(t('nOff'), t('nOffBody'), false);
+      if (!prev.online && c.online) notify(t('nOn'), tail, true);
     }
     prev = c;
   }
   $('nt').addEventListener('click', async () => {
-    if (!window.Notification) { alert('Цей браузер не підтримує сповіщення.'); return; }
+    if (!window.Notification) { alert(t('nNoSupport')); return; }
     if (notifyOn) { notifyOn = false; LS.set('kstarNotify', '0'); paintNt(); return; }
     const p = Notification.permission === 'granted' ? 'granted' : await Notification.requestPermission();
     notifyOn = p === 'granted'; LS.set('kstarNotify', notifyOn ? '1' : '0'); paintNt();
-    if (notifyOn) { beep(true); new Notification('KSTAR: сповіщення увімкнено', {body: 'Поки ця вкладка відкрита, повідомлю про зміну мережі, SoC 30/15/95% і втрату зв\'язку.'}); }
+    if (notifyOn) { beep(true); new Notification(t('nEnabled'), {body: t('nEnabledBody')}); }
   });
   paintNt();
 
   // ---- графік за добу ----
   let chart = null, chartV = null, chartDay = null; // null = сьогодні
-  const DAYS = ['неділя', 'понеділок', 'вівторок', 'середа', 'четвер', 'пʼятниця', 'субота'];
   const alpha = (c, a) => { const h = c.replace('#', ''); if (h.length !== 6) return c; const n = parseInt(h, 16); return 'rgba(' + (n >> 16 & 255) + ',' + (n >> 8 & 255) + ',' + (n & 255) + ',' + a + ')'; };
   const cssv = v => getComputedStyle(document.documentElement).getPropertyValue(v).trim();
   function needChart() {
@@ -404,7 +526,7 @@ footer a{color:inherit}
   async function loadChart(histToday) {
     const day = chartDay || kyivDate();
     const d = new Date(day + 'T12:00:00Z');
-    $('dLbl').textContent = chartDay ? DAYS[d.getUTCDay()] + ', ' + p2(d.getUTCDate()) + '.' + p2(d.getUTCMonth() + 1) : 'Сьогодні';
+    $('dLbl').textContent = chartDay ? L_().DAYS[d.getUTCDay()] + ', ' + p2(d.getUTCDate()) + '.' + p2(d.getUTCMonth() + 1) : t('today');
     $('dNext').disabled = !chartDay;
     try {
       const h = (!chartDay && histToday) ? histToday : await api('/residential/history/data/kse/list?deviceId=' + ST.cid + '&stime=' + day);
@@ -412,7 +534,7 @@ footer a{color:inherit}
       let alm = null;
       try { alm = await alarmIntervals(day); } catch (e) {}
       drawChart(h, day, alm);
-    } catch (e) { $('dsum').textContent = 'Не вдалося завантажити графік: ' + e.message; }
+    } catch (e) { $('dsum').textContent = t('chartErr') + e.message; }
   }
   function drawChart(hist, day, alm) {
     const T = (hist && hist.title) || [], R = ((hist && hist.dataList) || []).slice().reverse();
@@ -446,19 +568,19 @@ footer a{color:inherit}
 
     const sum = [];
     if (R.length) {
-      const fmtB = b => hm(b[0]) + '–' + (!chartDay && b[1] >= Date.now() - 60000 ? 'зараз' : hm(b[1]));
-      if (!bands.length) sum.push('Мережа була <b>весь день</b>');
+      const fmtB = b => hm(b[0]) + '–' + (!chartDay && b[1] >= Date.now() - 60000 ? t('now') : hm(b[1]));
+      if (!bands.length) sum.push(t('allDay'));
       else {
-        if (longB.length) sum.push('Без мережі: <b>' + longB.map(fmtB).join(', ') + '</b> (' + dur(offMin) + ')');
+        if (longB.length) sum.push(t('offList', longB.map(fmtB).join(', '), dur(offMin)));
         if (shortB.length) {
-          const secs = shortB.map(b => Math.round((b[1] - b[0]) / 1000));
-          sum.push((longB.length ? 'і ' : 'Мережа блимала: ') + '<b>' + shortB.length + ' ' + (shortB.length === 1 ? 'короткий провал' : shortB.length < 5 ? 'короткі провали' : 'коротких провалів') + '</b> (' + shortB.map(b => hm(b[0])).join(', ') + '; ' + (Math.max(...secs) < 60 ? 'до ' + Math.max(...secs) + ' с' : 'до ' + Math.ceil(Math.max(...secs) / 60) + ' хв') + ')');
+          const secs = shortB.map(b => Math.round((b[1] - b[0]) / 1000)), mxs = Math.max(...secs);
+          sum.push(t('glitches', shortB.length, longB.length > 0, shortB.map(b => hm(b[0])).join(', '), mxs < 60 ? mxs + ' ' + t('dS') : Math.ceil(mxs / 60) + ' ' + t('dM')));
         }
       }
-      sum.push(exact ? '<small>за журналом тривог</small>' : '<small>за 5-хв записами</small>');
-      sum.push('Мін. SoC <b>' + nf(minSoc) + '%</b>');
-      sum.push('Пік навантаження <b>' + nf(maxLoad) + ' Вт</b>');
-    } else sum.push('За цей день даних немає');
+      sum.push('<small>' + t(exact ? 'byAlarms' : 'by5') + '</small>');
+      sum.push(t('minSoc') + ' <b>' + nf(minSoc) + '%</b>');
+      sum.push(t('peak') + ' <b>' + nf(maxLoad) + ' ' + t('W') + '</b>');
+    } else sum.push(t('noDay'));
     $('dsum').innerHTML = sum.map(x => '<span>' + x + '</span>').join('');
 
     const bandsPlugin = {id: 'offBands', beforeDatasetsDraw(c) {
@@ -473,8 +595,8 @@ footer a{color:inherit}
       type: 'line',
       data: {datasets: [
         {label: 'SoC', data: soc, yAxisID: 'y1', borderColor: cSoc, borderWidth: 2.4, pointRadius: 0, tension: .25, spanGaps: false},
-        {label: 'Навантаження', data: load, yAxisID: 'y', borderColor: cLoad, backgroundColor: alpha(cLoad, .14), fill: 'origin', borderWidth: 1.4, pointRadius: 0, tension: .2, spanGaps: false},
-        {label: 'З мережі', data: grid, yAxisID: 'y', borderColor: cGrid, borderWidth: 1.4, borderDash: [4, 3], pointRadius: 0, tension: .2, spanGaps: false}
+        {label: t('dsLoad'), data: load, yAxisID: 'y', borderColor: cLoad, backgroundColor: alpha(cLoad, .14), fill: 'origin', borderWidth: 1.4, pointRadius: 0, tension: .2, spanGaps: false},
+        {label: t('dsGrid'), data: grid, yAxisID: 'y', borderColor: cGrid, borderWidth: 1.4, borderDash: [4, 3], pointRadius: 0, tension: .2, spanGaps: false}
       ]},
       options: {
         animation: false, maintainAspectRatio: false, interaction: {mode: 'index', intersect: false},
@@ -482,12 +604,12 @@ footer a{color:inherit}
           x: {type: 'linear', min: x0, max: x1, grid: {color: line}, border: {display: false},
               afterBuildTicks: ax => { ax.ticks = Array.from({length: 9}, (_, i) => ({value: x0 + i * 3 * 3600e3})); },
               ticks: {color: ink, maxRotation: 0, callback: v => v >= x1 ? '24:00' : hm(v)}},
-          y: {position: 'left', beginAtZero: true, grid: {color: line}, border: {display: false}, ticks: {color: ink, maxTicksLimit: 6, callback: v => v >= 1000 ? nf(v / 1000, 1) + 'к' : v}},
+          y: {position: 'left', beginAtZero: true, grid: {color: line}, border: {display: false}, ticks: {color: ink, maxTicksLimit: 6, callback: v => v >= 1000 ? nf(v / 1000, 1) + t('k') : v}},
           y1: {position: 'right', min: 0, max: 100, grid: {display: false}, border: {display: false}, ticks: {color: ink, stepSize: 25, callback: v => v + '%'}}
         },
         plugins: {legend: {display: false}, tooltip: {callbacks: {
           title: it => hm(it[0].parsed.x),
-          label: it => it.dataset.yAxisID === 'y1' ? ' SoC ' + nf(it.parsed.y) + '%' : ' ' + it.dataset.label + ' ' + nf(it.parsed.y) + ' Вт'
+          label: it => it.dataset.yAxisID === 'y1' ? ' SoC ' + nf(it.parsed.y) + '%' : ' ' + it.dataset.label + ' ' + nf(it.parsed.y) + ' ' + t('W')
         }}}
       },
       plugins: [bandsPlugin]
@@ -516,8 +638,8 @@ footer a{color:inherit}
     chartV = new Chart($('chartV'), {
       type: 'line',
       data: {datasets: [
-        {label: 'Мережа', data: gV, borderColor: cGrid, borderWidth: 1.8, pointRadius: 0, tension: .2, spanGaps: false},
-        {label: 'Вихід інвертора', data: iV, borderColor: alpha(cSoc, .6), borderWidth: 1.2, borderDash: [3, 3], pointRadius: 0, tension: .2, spanGaps: false}
+        {label: t('vGrid'), data: gV, borderColor: cGrid, borderWidth: 1.8, pointRadius: 0, tension: .2, spanGaps: false},
+        {label: t('vInv'), data: iV, borderColor: alpha(cSoc, .6), borderWidth: 1.2, borderDash: [3, 3], pointRadius: 0, tension: .2, spanGaps: false}
       ]},
       options: {
         animation: false, maintainAspectRatio: false, interaction: {mode: 'index', intersect: false},
@@ -530,7 +652,7 @@ footer a{color:inherit}
         },
         plugins: {legend: {display: false}, tooltip: {callbacks: {
           title: it => hm(it[0].parsed.x),
-          label: it => ' ' + it.dataset.label + ' ' + (it.parsed.y == null ? 'немає' : nf(it.parsed.y, 1) + ' В' + (it.raw.f ? ', ' + nf(it.raw.f, 2) + ' Гц' : ''))
+          label: it => ' ' + it.dataset.label + ' ' + (it.parsed.y == null ? t('none') : nf(it.parsed.y, 1) + ' ' + t('V') + (it.raw.f ? ', ' + nf(it.raw.f, 2) + ' ' + t('Hz') : ''))
         }}}
       },
       plugins: [bandsPlugin, limPlugin]
@@ -580,11 +702,11 @@ footer a{color:inherit}
       LAST[0] = lg; LAST[2] = vr;
       render.apply(null, LAST);
       const left = Math.max(0, Math.round((LIVE.until - Date.now()) / 60000));
-      $('upd').textContent = '⚡ живий режим · ' + hm(Date.now()) + ' · ще ' + left + ' хв';
+      $('upd').textContent = t('liveUpd', hm(Date.now()), left);
     } catch (e) {}
   }
   async function liveStart() {
-    try { await api('/residential/device/detail/start/refresh?collectId=' + ST.cid); } catch (e) { alert('Портал не ввімкнув швидке оновлення: ' + e.message); return; }
+    try { await api('/residential/device/detail/start/refresh?collectId=' + ST.cid); } catch (e) { alert(t('liveErr') + e.message); return; }
     LIVE = {until: Date.now() + 10 * 60000, timer: setInterval(liveTick, 10000)};
     $('lv').classList.add('on');
     setTimeout(liveTick, 1500);
@@ -607,18 +729,18 @@ footer a{color:inherit}
     const start = today0 - (oDays - 1) * 864e5, now = Date.now();
     let iv;
     try { iv = await alarmRange(start, now); } catch (e) { iv = null; }
-    if (!iv) { $('oNote').textContent = 'Журнал тривог не покриває весь період.'; return; }
+    if (!iv) { $('oNote').textContent = t('noCover'); return; }
     const oldest = ALM.list.length ? ts(ALM.list[ALM.list.length - 1].saveTime) : now;
     const SHORT = 5 * 60000;
     const longs = iv.filter(v => v[1] - v[0] >= SHORT), shorts = iv.filter(v => v[1] - v[0] < SHORT);
     const totMin = longs.reduce((a, v) => a + (Math.min(v[1], now) - Math.max(v[0], start)) / 60000, 0);
     const mx = longs.reduce((a, v) => Math.max(a, v[1] - v[0]), 0) / 60000;
     const st = [
-      ['Відключень', longs.length],
-      ['Без світла', dur(totMin)],
-      ['В середньому', dur(totMin / oDays) + '/добу'],
-      ['Найдовше', longs.length ? dur(mx) : '–'],
-      ['Коротких провалів', shorts.length]
+      [t('sCount'), longs.length],
+      [t('sTotal'), dur(totMin)],
+      [t('sAvg'), dur(totMin / oDays) + t('perDay')],
+      [t('sMax'), longs.length ? dur(mx) : '–'],
+      [t('sShort'), shorts.length]
     ];
     $('oStats').innerHTML = st.map(x => '<div><label>' + x[0] + '</label><b>' + x[1] + '</b></div>').join('');
 
@@ -632,7 +754,7 @@ footer a{color:inherit}
       if (!noData) daysWithData++;
       for (let h = 0; h < 24; h++) { const a = d0 + h * 3600e3, b = a + 3600e3; if (segs.some(v => v[1] > a && v[0] < b)) hourHits[h]++; }
       const we = d.getDay() === 0 || d.getDay() === 6;
-      rows += '<div class="dl' + (we ? ' we' : '') + '">' + DOW2[d.getDay()] + ' ' + p2(d.getDate()) + '.' + p2(d.getMonth() + 1) + '</div><div class="tr' + (noData ? ' nod' : '') + '">' +
+      rows += '<div class="dl' + (we ? ' we' : '') + '">' + L_().DOW[d.getDay()] + ' ' + p2(d.getDate()) + '.' + p2(d.getMonth() + 1) + '</div><div class="tr' + (noData ? ' nod' : '') + '">' +
         segs.map(v => { const l = (v[0] - d0) / 864e5 * 100, w = (v[1] - v[0]) / 864e5 * 100, sh = v[1] - v[0] < SHORT;
           return '<i' + (sh ? ' class="sh"' : '') + ' style="left:' + l.toFixed(2) + '%;width:' + w.toFixed(2) + '%" title="' + hm(v[0]) + '–' + hm(v[1]) + ' (' + dur((v[1] - v[0]) / 60000) + ')"></i>'; }).join('') + '</div>';
     }
@@ -640,7 +762,7 @@ footer a{color:inherit}
     $('oTl').innerHTML = rows;
 
     const n = Math.max(1, daysWithData);
-    $('oHist').innerHTML = hourHits.map((c, h) => '<i title="' + h + ':00–' + (h + 1) + ':00: ' + Math.round(c / n * 100) + '% днів" style="height:' + Math.max(2, c / n * 100) + '%"></i>').join('');
+    $('oHist').innerHTML = hourHits.map((c, h) => '<i title="' + h + ':00–' + (h + 1) + ':00: ' + t('pctDays', Math.round(c / n * 100)) + '" style="height:' + Math.max(2, c / n * 100) + '%"></i>').join('');
     $('oHax').innerHTML = hourHits.map((c, h) => '<span>' + (h % 3 === 0 ? h : '') + '</span>').join('');
 
     // години, коли світла немає щонайменше в половині днів
@@ -649,10 +771,9 @@ footer a{color:inherit}
     share.concat([0]).forEach((v, h) => { if (v >= .5 && rs === null) rs = h; if (v < .5 && rs !== null) { ranges.push([rs, h]); rs = null; } });
     const top = share.map((v, h) => [v, h]).sort((a, b) => b[0] - a[0])[0];
     $('oNote').innerHTML = ranges.length
-      ? 'Найчастіше світла немає: <b>' + ranges.map(r => r[0] + ':00–' + r[1] + ':00').join(', ') + '</b> (у половині днів і частіше)'
-      : (top && top[0] > 0 ? 'Сталого графіка не видно. Найчастіше вимикають о <b>' + top[1] + ':00–' + (top[1] + 1) + ':00</b> (' + Math.round(top[0] * 100) + '% днів)' : 'Відключень за період не було');
+      ? t('oftenOff', ranges.map(r => r[0] + ':00–' + r[1] + ':00').join(', '))
+      : (top && top[0] > 0 ? t('noPattern', top[1] + ':00–' + (top[1] + 1) + ':00', Math.round(top[0] * 100)) : t('noOut'));
   }
-  const DOW2 = ['Нд', 'Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб'];
   document.querySelectorAll('#oSeg button').forEach(b => b.addEventListener('click', () => {
     document.querySelectorAll('#oSeg button').forEach(x => x.classList.toggle('on', x === b));
     oDays = Number(b.dataset.d); loadOutStats();
@@ -677,9 +798,9 @@ footer a{color:inherit}
     if (!r.ok || !j || j.code !== 200) throw new Error('HTTP ' + r.status + ' ' + path.split('?')[0]);
     return j.data;
   }
-  // портал вимагає поточний київський час у stime
+  // портал вимагає поточний час станції у stime
   function stime() {
-    return new Intl.DateTimeFormat('sv-SE', {timeZone: 'Europe/Kiev', year: 'numeric', month: '2-digit', day: '2-digit',
+    return new Intl.DateTimeFormat('sv-SE', {timeZone: stTz(), year: 'numeric', month: '2-digit', day: '2-digit',
       hour: '2-digit', minute: '2-digit', second: '2-digit', hourCycle: 'h23'}).format(new Date()).replace(' ', '+');
   }
 
@@ -688,10 +809,21 @@ footer a{color:inherit}
     busy = true; $('rf').classList.add('spin');
     try {
       if (!token()) throw new Error('AUTH');
-      const stations = await api('/web/station/list/page/v2', {current: 1, size: 20});
-      const s = stations.list && stations.list[0];
-      if (!s) throw new Error('Станцію не знайдено');
-      ST = {id: s.stationId, name: s.stationName, cid: (s.collectIds || [])[0], commun: s.communStatus};
+      if (!ST) {
+        // станція зі сторінки порталу, з якої натиснули закладку (/station/<id>/…), інакше перша у списку
+        let sid = null;
+        try { const m = ((window.opener && window.opener.location.pathname) || location.pathname).match(/station\/(\d+)/); if (m) sid = m[1]; } catch (e) {}
+        let commun = null;
+        if (!sid) {
+          const stations = await api('/web/station/list/page/v2', {current: 1, size: 20});
+          const s0 = stations.list && stations.list[0];
+          if (!s0) throw new Error(t('noStation'));
+          sid = s0.stationId; commun = s0.communStatus;
+        }
+        const info = await api('/web/station/manager/getinfo?stationId=' + sid);
+        ST = {id: sid, name: info.stationName, cid: (info.collectList || [])[0], tz: info.timeZone || 'Europe/Kiev', commun: commun};
+        if (!ST.cid) throw new Error(t('noStation'));
+      }
       const id = ST.cid, t = stime();
       const r = await Promise.allSettled([
         api('/residential/device/detail/logic?collectId=' + id + '&refreshFlag=false'),
@@ -717,9 +849,7 @@ footer a{color:inherit}
     } catch (e) {
       const n = $('note');
       n.style.display = 'block';
-      n.innerHTML = String(e.message) === 'AUTH'
-        ? 'Сесія порталу закінчилась. <a href="https://sync.ksdatacloud.com/" target="_blank" style="color:inherit">Увійдіть на портал</a>, потім натисніть ↻.'
-        : 'Не вдалося отримати дані: ' + e.message;
+      n.innerHTML = String(e.message) === 'AUTH' ? t('authNote') : t('fetchErr') + e.message;
     } finally {
       busy = false; $('rf').classList.remove('spin');
     }
@@ -732,12 +862,12 @@ footer a{color:inherit}
     const cmax = g('Maximum Cell Voltage'), cmin = g('Minimum Cell Voltage');
     const parts = [
       'SOH <b>' + nf(g('Battery State of Health')) + '%</b>',
-      '<b>' + nf(g('Battery Pack Cycle Count')) + '</b> циклів',
-      '<b>' + nf(g('Battery Pack Total Capacity'), 1) + '</b>/' + nf(g('Battery Pack Design Rated Capacity')) + ' А·год',
-      cmax != null ? 'комірки <b>' + nf(cmin, 3) + '–' + nf(cmax, 3) + ' В</b> (Δ' + nf((cmax - cmin) * 1000) + ' мВ)' : null,
-      g('Battery Pack Cell Maximum Temperature') != null ? 'комірки ' + nf(g('Battery Pack Cell Minimum Temperature'), 1) + '–' + nf(g('Battery Pack Cell Maximum Temperature'), 1) + ' °C' : null,
+      '<b>' + nf(g('Battery Pack Cycle Count')) + '</b> ' + t('cycles'),
+      '<b>' + nf(g('Battery Pack Total Capacity'), 1) + '</b>/' + nf(g('Battery Pack Design Rated Capacity')) + ' ' + t('Ah'),
+      cmax != null ? t('cells') + ' <b>' + nf(cmin, 3) + '–' + nf(cmax, 3) + ' ' + t('V') + '</b> (Δ' + nf((cmax - cmin) * 1000) + ' ' + t('mV') + ')' : null,
+      g('Battery Pack Cell Maximum Temperature') != null ? t('cells') + ' ' + nf(g('Battery Pack Cell Minimum Temperature'), 1) + '–' + nf(g('Battery Pack Cell Maximum Temperature'), 1) + ' °C' : null,
       g('Battery Pack MOS Maximum Temperature') != null ? 'MOS ' + nf(g('Battery Pack MOS Maximum Temperature'), 1) + ' °C' : null,
-      g('Battery Pack Balance Status') ? 'балансування' : null
+      g('Battery Pack Balance Status') ? t('balancing') : null
     ].filter(Boolean);
     return '<div class="meta2">' + parts.join(' · ') + '</div>';
   }
@@ -750,8 +880,8 @@ footer a{color:inherit}
       LS.set('kstarUpg', ''); UPG = null; loadUpgrade().then(() => { if (LAST) render.apply(null, LAST); });
     }
     const up = L.filter(x => x.targetVersion && x.targetVersion !== x.deviceVersion && cur[String(x.deviceType).toLowerCase()] !== x.targetVersion);
-    if (up.length) return '<span class="pill warn">є оновлення</span><small>' + up.map(x => String(x.deviceType).toUpperCase() + ' ' + x.deviceVersion + ' → ' + x.targetVersion).join(', ') + '</small>';
-    if (UPG) return '<span class="pill ok">актуальна</span><small>ARM ' + (ver['ARM Version'] || '–') + ', DSP ' + (ver['DSP Version'] || '–') + '</small>';
+    if (up.length) return '<span class="pill warn">' + t('fwUpd') + '</span><small>' + up.map(x => String(x.deviceType).toUpperCase() + ' ' + x.deviceVersion + ' → ' + x.targetVersion).join(', ') + '</small>';
+    if (UPG) return '<span class="pill ok">' + t('fwOk') + '</span><small>ARM ' + (ver['ARM Version'] || '–') + ', DSP ' + (ver['DSP Version'] || '–') + '</small>';
     return 'ARM ' + (ver['ARM Version'] || '–') + '<small>DSP ' + (ver['DSP Version'] || '–') + '</small>';
   }
 
@@ -767,15 +897,15 @@ footer a{color:inherit}
 
     document.title = (island ? '🔴 ' : '🟢 ') + nf(soc) + '% · KSTAR';
     $('name').textContent = ST.name || 'KSTAR';
-    $('upd').textContent = 'Дані інвертора ' + hm(tData) + ' · ' + ago(age) + ' · авто кожні ' + REFRESH_S + ' с';
+    $('upd').textContent = t('updLine', hm(tData), ago(age), REFRESH_S);
 
     // мережа
     const st = $('state');
     st.className = 'state ' + (island ? 'off' : 'on');
-    $('stTxt').textContent = island ? 'Мережі немає' : 'Мережа є';
+    $('stTxt').textContent = island ? t('gridOff') : t('gridOn');
     const gridF = FL.filter(f => /grid/i.test(f.faultMessage || '')).map(f => ts(f.saveTime)).sort();
     if (!$('stSub').textContent || $('stSub').dataset.st !== String(island)) {
-      $('stSub').textContent = island && gridF.length ? 'з ' + hm(gridF[0]) + ' · ' + dur((Date.now() - gridF[0]) / 60000) : '';
+      $('stSub').textContent = island && gridF.length ? t('since', hm(gridF[0]), dur((Date.now() - gridF[0]) / 60000)) : '';
       $('stSub').dataset.st = String(island);
     }
 
@@ -789,33 +919,33 @@ footer a{color:inherit}
     const usable = Math.max(0, (soc - MINS) / 100 * BATT_KWH);
     if (load > 20) {
       const h = usable * 1000 / load;
-      $('autoH').textContent = '≈ ' + (h >= 48 ? Math.round(h / 24) + ' д' : h >= 10 ? Math.round(h) + ' год' : dur(h * 60));
-      $('autoTxt').textContent = 'запас до ' + MINS + '%' + (DOD ? ' (межа з інвертора)' : '') + ' при ' + nf(load) + ' Вт (' + nf(usable, 1) + ' кВт·год)';
-    } else { $('autoH').textContent = '–'; $('autoTxt').textContent = 'запас'; }
+      $('autoH').textContent = '≈ ' + (h >= 48 ? Math.round(h / 24) + ' ' + t('dD') : h >= 10 ? Math.round(h) + ' ' + t('dH') : dur(h * 60));
+      $('autoTxt').textContent = t('autoTxt', MINS, !!DOD, nf(load), nf(usable, 1));
+    } else { $('autoH').textContent = '–'; $('autoTxt').textContent = t('reserve'); }
 
     // потоки
     $('fLoad').innerHTML = W(load);
     $('fBatt').innerHTML = W(batt);
     const bs = $('fBattSub');
-    if (/dis/i.test(dcdc)) { bs.textContent = 'розряд'; bs.className = 'sub dis'; }
-    else if (/charg/i.test(dcdc)) { bs.textContent = 'заряд'; bs.className = 'sub chg'; }
-    else { bs.textContent = TR[dcdc] ? TR[dcdc].toLowerCase() : (dcdc || ' '); bs.className = 'sub'; }
-    $('fGrid').innerHTML = island ? '<span style="color:var(--off)">0</span><small>Вт</small>' : W(logic.grid_power);
-    $('fGridSub').textContent = island ? 'острівний режим' : (Number(logic.grid_power) > 5 ? 'імпорт' : 'підключено');
+    if (/dis/i.test(dcdc)) { bs.textContent = t('dis'); bs.className = 'sub dis'; }
+    else if (/charg/i.test(dcdc)) { bs.textContent = t('chg'); bs.className = 'sub chg'; }
+    else { bs.textContent = LANG === 'uk' && TR[dcdc] ? TR[dcdc].toLowerCase() : (dcdc ? dcdc.toLowerCase() : ' '); bs.className = 'sub'; }
+    $('fGrid').innerHTML = island ? '<span style="color:var(--off)">0</span><small>' + t('W') + '</small>' : W(logic.grid_power);
+    $('fGridSub').textContent = island ? t('island') : (Number(logic.grid_power) > 5 ? t('importing') : t('connected'));
     $('fPv').innerHTML = W(logic.pv_power);
 
     // real-time дані
     const cat = n => { const c = real && real.find(x => x.category === n); return (c && c.data && c.data.length) ? c.data : [{}]; };
     const B = cat(4)[0], G = cat(2)[0], L = cat(3)[0], PV = cat(1)[0];
-    $('fPvSub').textContent = num(PV['PV Daily Generation']) != null ? 'сьогодні ' + nf(PV['PV Daily Generation'], 1) + ' кВт·год' : ' ';
+    $('fPvSub').textContent = num(PV['PV Daily Generation']) != null ? t('pvToday', nf(PV['PV Daily Generation'], 1)) : ' ';
 
     // статуси
     const rows = [
-      ['Система', tr(sys)],
-      ['Інвертор', tr(inv)],
-      ['Режим роботи', tr(logic.sac)],
-      ['Зв\'язок', '<span class="pill ' + (online ? 'ok">онлайн' : 'off">офлайн') + '</span><small>' + (online ? 'дані надходять' : 'даних немає понад 10 хв') + (String(ST.commun) === '0' && online ? '; портал помилково показує «офлайн»' : '') + '</small>'],
-      ['Прошивка', fwCell(ver)]
+      [t('rSys'), tr(sys)],
+      [t('rInv'), tr(inv)],
+      [t('rMode'), tr(logic.sac)],
+      [t('rConn'), '<span class="pill ' + (online ? 'ok">' + t('online') : 'off">' + t('offline')) + '</span><small>' + (online ? t('dataFlow') : t('noData10')) + (String(ST.commun) === '0' && online ? t('portalWrong') : '') + '</small>'],
+      [t('rFw'), fwCell(ver)]
     ];
     $('stat').innerHTML = rows.map(r => '<dt>' + r[0] + '</dt><dd>' + r[1] + '</dd>').join('');
 
@@ -823,8 +953,8 @@ footer a{color:inherit}
     $('faults').innerHTML = FL.length ? FL.map(f => {
       const m = String(f.faultMessage || '').match(/^([A-Z]\d+)\s+(.*)$/);
       const code = m ? m[1] : '', txt = m ? m[2] : f.faultMessage;
-      return '<li><code>' + (code || '!') + '</code><div>' + (FT[txt] || txt) + (FT[txt] ? '<small>' + txt + '</small>' : '') + '</div><time>' + hm(ts(f.saveTime)) + ', ' + dmy(ts(f.saveTime)) + '</time></li>';
-    }).join('') : '<li class="empty">Активних аварій немає</li>';
+      return '<li><code>' + (code || '!') + '</code><div>' + (LANG === 'uk' && FT[txt] ? FT[txt] + '<small>' + txt + '</small>' : txt) + '</div><time>' + hm(ts(f.saveTime)) + ', ' + dmy(ts(f.saveTime)) + '</time></li>';
+    }).join('') : '<li class="empty">' + t('noFaults') + '</li>';
 
     // модулі
     const P = cat(5).filter(p => p.SN);
@@ -836,22 +966,22 @@ footer a{color:inherit}
     if (P.length) {
       $('packs').innerHTML = P.map((p, i) => {
         const a = num(p['Battery Pack Current']), s = num(p['Battery Pack State of Charge'] ?? p['Battery State of Charge']);
-        const dir = a < -0.1 ? 'розряд ' + nf(-a, 1) + ' A' : a > 0.1 ? 'заряд ' + nf(a, 1) + ' A' : 'струм 0 A';
-        return '<div class="pack"><div class="nm">Модуль ' + (i + 1) + '<small>…' + String(p.SN).slice(-6) + '</small></div>' +
+        const dir = a < -0.1 ? t('pDis') + ' ' + nf(-a, 1) + ' A' : a > 0.1 ? t('pChg') + ' ' + nf(a, 1) + ' A' : t('pZero');
+        return '<div class="pack"><div class="nm">' + t('module') + ' ' + (i + 1) + '<small>…' + String(p.SN).slice(-6) + '</small></div>' +
           '<div class="pb"><i style="width:' + Math.max(0, Math.min(100, s)) + '%"></i></div><div class="pv">' + nf(s) + '%</div>' +
-          '<div class="meta">' + nf(p['Battery Pack Voltage'], 2) + ' В · ' + dir + ' · BMS ' + (p['BMS Version Number'] || '–') + '</div>' + bmsLine(BMS[i]) + '</div>';
+          '<div class="meta">' + nf(p['Battery Pack Voltage'], 2) + ' ' + t('V') + ' · ' + dir + ' · BMS ' + (p['BMS Version Number'] || '–') + '</div>' + bmsLine(BMS[i]) + '</div>';
       }).join('');
       const S = P.map(p => num(p['Battery State of Charge'])).filter(x => x != null);
       const V = P.map(p => num(p['Battery Pack Voltage'])).filter(x => x != null);
       const dS = S.length > 1 ? Math.max(...S) - Math.min(...S) : 0, dV = V.length > 1 ? Math.max(...V) - Math.min(...V) : 0;
       const cellD = BMS.filter(Boolean).map(r => (bv(r, 'Maximum Cell Voltage') - bv(r, 'Minimum Cell Voltage')) * 1000).filter(x => !isNaN(x));
       const flags = BMS.filter(Boolean).some(r => bv(r, 'Battery Pack Warning Flag') || bv(r, 'Battery Pack Protection Flag'));
-      $('packFoot').innerHTML = '<span class="pill ' + (dS > 5 ? 'warn' : 'ok') + '">Різниця SoC ' + nf(dS) + '%</span>' +
-        '<span class="pill ' + (dV > 0.3 ? 'warn' : 'ok') + '">Різниця напруги ' + nf(dV * 1000) + ' мВ</span>' +
-        (cellD.length ? '<span class="pill ' + (Math.max(...cellD) > 80 ? 'warn' : 'ok') + '">Розкид комірок до ' + nf(Math.max(...cellD)) + ' мВ</span>' : '') +
-        (BMS.length ? '<span class="pill ' + (flags ? 'warn">BMS: попередження' : 'ok">BMS: без попереджень') + '</span>' : '');
+      $('packFoot').innerHTML = '<span class="pill ' + (dS > 5 ? 'warn' : 'ok') + '">' + t('dSoc') + ' ' + nf(dS) + '%</span>' +
+        '<span class="pill ' + (dV > 0.3 ? 'warn' : 'ok') + '">' + t('dVolt') + ' ' + nf(dV * 1000) + ' ' + t('mV') + '</span>' +
+        (cellD.length ? '<span class="pill ' + (Math.max(...cellD) > 80 ? 'warn' : 'ok') + '">' + t('cellSpread') + ' ' + nf(Math.max(...cellD)) + ' ' + t('mV') + '</span>' : '') +
+        (BMS.length ? '<span class="pill ' + (flags ? 'warn">' + t('bmsWarn') : 'ok">' + t('bmsOk')) + '</span>' : '');
     } else {
-      $('packs').innerHTML = '<div class="empty">Дані модулів недоступні</div>'; $('packFoot').innerHTML = '';
+      $('packs').innerHTML = '<div class="empty">' + t('noPacks') + '</div>'; $('packFoot').innerHTML = '';
     }
 
     // мережа і вихід (історія за добу, найновіший запис першим)
@@ -865,45 +995,45 @@ footer a{color:inherit}
     const isl = HD.filter(r => (at(r, 'R-phase Grid Voltage') || 0) < 50 && (at(r, 'Battery Current') || 0) > 0.5)
       .map(r => at(r, 'Battery Voltage') * at(r, 'Battery Current') - (at(r, 'R-phase Inverter Power') || 0))
       .filter(x => x > 0 && x < 300);
-    let selfW = isl.length >= 3 ? isl.reduce((a, x) => a + x, 0) / isl.length : null, selfSrc = 'сьогодні, ' + isl.length + ' ' + (isl.length % 10 >= 2 && isl.length % 10 <= 4 && (isl.length % 100 < 12 || isl.length % 100 > 14) ? 'записи' : isl.length % 10 === 1 && isl.length % 100 !== 11 ? 'запис' : 'записів') + ' без мережі';
+    let selfW = isl.length >= 3 ? isl.reduce((a, x) => a + x, 0) / isl.length : null, selfSrc = t('selfToday', isl.length);
     if (selfW != null) LS.set('kstarSelf', JSON.stringify({w: selfW, d: kyivDate()}));
-    else { const c = lsJson('kstarSelf'); if (c) { selfW = c.w; selfSrc = 'за відключенням ' + c.d.slice(8, 10) + '.' + c.d.slice(5, 7); } }
+    else { const c = lsJson('kstarSelf'); if (c) { selfW = c.w; selfSrc = t('selfFrom', c.d.slice(8, 10) + '.' + c.d.slice(5, 7)); } }
     const selfNow = (island && H0 && (at(H0, 'Battery Current') || 0) > 0.5) ? at(H0, 'Battery Voltage') * at(H0, 'Battery Current') - (at(H0, 'R-phase Inverter Power') || 0) : null;
-    $('fLoadSub').textContent = island && selfW != null ? 'будинок + ~' + nf(selfW) + ' Вт інвертор' : 'будинок';
+    $('fLoadSub').textContent = island && selfW != null ? t('houseInv', nf(selfW)) : t('house');
     const eRows = H0 ? [
-      ['Напруга мережі', island ? '<span class="pill off">0 В</span>' : unit(at(H0, 'R-phase Grid Voltage'), 'В', 1),
-        gv.length ? 'сьогодні ' + nf(Math.min(...gv), 0) + '–' + nf(Math.max(...gv), 0) + ' В' : 'сьогодні мережі не було'],
-      ['Частота мережі', island ? '–' : unit(at(H0, 'R-phase Grid Frequency'), 'Гц', 2), ''],
-      ['Потужність з мережі', unit(at(H0, 'R-phase Grid Meter Power'), 'Вт'), ''],
-      ['Вихід інвертора', unit(at(H0, 'R-phase Inverter Voltage'), 'В', 1) + ' · ' + unit(at(H0, 'R-phase Inverter Frequency'), 'Гц', 2),
-        unit(at(H0, 'R-phase Inverter Power'), 'Вт') + ', ' + unit(at(H0, 'R-phase Inverter Current'), 'А', 2)],
-      ['Резервна лінія (Backup)', unit(at(H0, 'R-phase Backup Voltage'), 'В', 1), unit(at(H0, 'R-phase Backup Current'), 'А', 2)],
+      [t('gridV'), island ? '<span class="pill off">0 ' + t('V') + '</span>' : unit(at(H0, 'R-phase Grid Voltage'), t('V'), 1),
+        gv.length ? t('todayRange', nf(Math.min(...gv), 0), nf(Math.max(...gv), 0)) : t('noGridToday')],
+      [t('gridF'), island ? '–' : unit(at(H0, 'R-phase Grid Frequency'), t('Hz'), 2), ''],
+      [t('gridP'), unit(at(H0, 'R-phase Grid Meter Power'), t('W')), ''],
+      [t('invOut'), unit(at(H0, 'R-phase Inverter Voltage'), t('V'), 1) + ' · ' + unit(at(H0, 'R-phase Inverter Frequency'), t('Hz'), 2),
+        unit(at(H0, 'R-phase Inverter Power'), t('W')) + ', ' + unit(at(H0, 'R-phase Inverter Current'), t('A'), 2)],
+      [t('backup'), unit(at(H0, 'R-phase Backup Voltage'), t('V'), 1), unit(at(H0, 'R-phase Backup Current'), t('A'), 2)],
       ...(num(ver['INV Max Output Current (A)']) ? (() => {
         const mx = num(ver['INV Max Output Current (A)']), cur = Math.abs(at(H0, 'R-phase Inverter Current') || 0);
         const kw = mx * (at(H0, 'R-phase Inverter Voltage') || 230) / 1000, pct = cur / mx * 100;
-        return [['Межа виходу інвертора', nf(mx, 1) + ' А · ~' + nf(kw, 1) + ' кВт',
-          'зараз ' + nf(cur, 2) + ' А, ' + (pct >= 80 ? '<span style="color:var(--warn)">' + nf(pct) + '% від межі</span>' : nf(pct) + '% від межі')]];
+        return [[t('limit'), nf(mx, 1) + ' ' + t('A') + ' · ~' + nf(kw, 1) + ' ' + t('kW'),
+          t('nowA', nf(cur, 2), pct >= 80 ? '<span style="color:var(--warn)">' + nf(pct) + '%</span>' : nf(pct) + '%')]];
       })() : []),
-      ['Батарея (шина)', unit(at(H0, 'Battery Voltage'), 'В', 2), unit(at(H0, 'Battery Current'), 'А', 1)],
-      ['Власні потреби системи', selfW == null ? '–' : '~' + nf(selfW) + ' Вт' + (selfNow != null && selfNow > 0 && selfNow < 300 ? '<small style="display:inline;margin-left:6px">зараз ' + nf(selfNow) + ' Вт</small>' : ''),
-        selfW == null ? 'порахую під час першого відключення' : selfSrc + ' · ~' + nf(selfW * 24 / 1000, 1) + ' кВт·год/добу']
+      [t('battBus'), unit(at(H0, 'Battery Voltage'), t('V'), 2), unit(at(H0, 'Battery Current'), t('A'), 1)],
+      [t('selfRow'), selfW == null ? '–' : '~' + nf(selfW) + ' ' + t('W') + (selfNow != null && selfNow > 0 && selfNow < 300 ? '<small style="display:inline;margin-left:6px">' + t('nowW') + ' ' + nf(selfNow) + ' ' + t('W') + '</small>' : ''),
+        selfW == null ? t('selfFirst') : selfSrc + ' · ~' + nf(selfW * 24 / 1000, 1) + ' ' + t('kwhDay')]
     ] : [];
     $('elec').innerHTML = eRows.length ? eRows.map(r => '<dt>' + r[0] + '</dt><dd>' + r[1] + (r[2] ? '<small>' + r[2] + '</small>' : '') + '</dd>').join('')
-      : '<dt>Немає даних за сьогодні</dt><dd></dd>';
+      : '<dt>' + t('noDataToday') + '</dt><dd></dd>';
 
     // енергія
     const c = (v, d) => v == null ? '<small>–</small>' : nf(v, d == null ? 1 : d);
     const en = [
-      ['З мережі', G['Daily Energy Consumption Purchase'], G['Monthly Energy Consumption Purchase'], G['Yearly Energy Consumption Purchase'], G['Total Energy Consumption Purchase']],
-      ['Спожито будинком', L['Daily Load Energy Consumption'], L['Monthly Load Energy Consumption'], L['Yearly Load Energy Consumption'], null],
-      ['Заряд батареї', B['Battery Daily Charge Energy'], null, null, B['Battery Total Charge Energy']],
-      ['Розряд батареї', B['Battery Daily Discharge Energy'], null, null, B['Battery Total Discharge Energy']],
-      ['Сонце', PV['PV Daily Generation'], PV['PV Monthly Generation'], PV['PV Yearly Generation'], PV['PV Total Generation']],
-      ['Віддано в мережу', G['Daily Energy Consumption Sell'], G['Monthly Energy Consumption Sell'], G['Yearly Energy Consumption Sell'], G['Total Energy Consumption Sell']]
+      [t('eImp'), G['Daily Energy Consumption Purchase'], G['Monthly Energy Consumption Purchase'], G['Yearly Energy Consumption Purchase'], G['Total Energy Consumption Purchase']],
+      [t('eLoad'), L['Daily Load Energy Consumption'], L['Monthly Load Energy Consumption'], L['Yearly Load Energy Consumption'], null],
+      [t('eChg'), B['Battery Daily Charge Energy'], null, null, B['Battery Total Charge Energy']],
+      [t('eDis'), B['Battery Daily Discharge Energy'], null, null, B['Battery Total Discharge Energy']],
+      [t('ePv'), PV['PV Daily Generation'], PV['PV Monthly Generation'], PV['PV Yearly Generation'], PV['PV Total Generation']],
+      [t('eExp'), G['Daily Energy Consumption Sell'], G['Monthly Energy Consumption Sell'], G['Yearly Energy Consumption Sell'], G['Total Energy Consumption Sell']]
     ];
     // власні потреби за балансом: (з мережі + сонце + розряд) − (будинок + заряд + експорт)
     const bal = (imp, pv, dis, ld, chg, ex) => { if ([imp, ld].some(x => num(x) == null)) return null; const v = num(imp) + (num(pv) || 0) + (num(dis) || 0) - num(ld) - (num(chg) || 0) - (num(ex) || 0); return v > 0.05 ? v : null; };
-    en.push(['Власні потреби системи<small style="display:block;font-size:11px">баланс; місяць і рік без поправки на батарею</small>',
+    en.push([t('eSelf'),
       bal(G['Daily Energy Consumption Purchase'], PV['PV Daily Generation'], B['Battery Daily Discharge Energy'], L['Daily Load Energy Consumption'], B['Battery Daily Charge Energy'], G['Daily Energy Consumption Sell']),
       bal(G['Monthly Energy Consumption Purchase'], PV['PV Monthly Generation'], 0, L['Monthly Load Energy Consumption'], 0, G['Monthly Energy Consumption Sell']),
       bal(G['Yearly Energy Consumption Purchase'], PV['PV Yearly Generation'], 0, L['Yearly Load Energy Consumption'], 0, G['Yearly Energy Consumption Sell']),
@@ -916,14 +1046,14 @@ footer a{color:inherit}
     const bmsC = BMS.filter(Boolean).map(r => bv(r, 'Battery Pack Cycle Count')).filter(x => x != null);
     const cyc = bmsC.length ? Math.max(...bmsC) : eqc;
     $('cyc').textContent = cyc == null ? '–' : nf(cyc, cyc < 10 && !bmsC.length ? 1 : 0);
-    $('cycLbl').textContent = bmsC.length ? 'циклів за лічильником BMS' : 'еквівалентних повних циклів';
+    $('cycLbl').textContent = t(bmsC.length ? 'cycBms' : 'cycEq');
     $('cycBar').style.width = cyc == null ? '0' : Math.min(100, cyc / CYCLE_LIFE * 100) + '%';
-    $('cycTxt').textContent = cyc == null ? '' : nf(cyc / CYCLE_LIFE * 100, 2) + '% від умовних ' + nf(CYCLE_LIFE) + ' циклів' +
-      (eqc != null ? ' · за енергією ' + nf(eqc, 1) + ' екв. циклу (' + nf(tDis, 0) + ' / ' + nf(BATT_KWH, 1) + ' кВт·год)' : '');
+    $('cycTxt').textContent = cyc == null ? '' : t('cycTxt', nf(cyc / CYCLE_LIFE * 100, 2), nf(CYCLE_LIFE)) +
+      (eqc != null ? t('cycEnergy', nf(eqc, 1), nf(tDis, 0), nf(BATT_KWH, 1)) : '');
     const resRows = [
-      ['Заряджено за весь час', tChg == null ? '–' : nf(tChg, 0) + ' кВт·год'],
-      ['Розряджено за весь час', tDis == null ? '–' : nf(tDis, 0) + ' кВт·год'],
-    ].concat(BMS.filter(Boolean).length ? [['Стан (SOH)', BMS.filter(Boolean).map(r => nf(bv(r, 'Battery State of Health')) + '%').join(' / ') + '<small>за BMS модулів</small>']] : []);
+      [t('charged'), tChg == null ? '–' : nf(tChg, 0) + ' ' + t('kWh')],
+      [t('discharged'), tDis == null ? '–' : nf(tDis, 0) + ' ' + t('kWh')],
+    ].concat(BMS.filter(Boolean).length ? [[t('soh'), BMS.filter(Boolean).map(r => nf(bv(r, 'Battery State of Health')) + '%').join(' / ') + '<small>' + t('sohSrc') + '</small>']] : []);
     $('resDl').innerHTML = resRows.map(r => '<dt>' + r[0] + '</dt><dd>' + r[1] + '</dd>').join('');
 
     $('dev').textContent = [ver['Inverter Model'], ver['Battery Name']].filter(Boolean).join(' · ');
@@ -932,6 +1062,13 @@ footer a{color:inherit}
   }
 
   $('rf').addEventListener('click', refresh);
+  $('lang').addEventListener('click', () => {
+    LANG = LANG === 'uk' ? 'en' : 'uk';
+    try { localStorage.setItem('kstarLang', LANG); } catch (e) {}
+    applyStatic(); paintNt(); $('stSub').textContent = '';
+    if (LAST) { const rs = render.apply(null, LAST); updateSince(rs.island, LAST[5], rs.tData, rs.alarmStart); }
+    loadChart(chartDay ? null : LAST && LAST[5]); loadOutStats();
+  });
   document.addEventListener('visibilitychange', () => { if (!document.hidden) refresh(); });
   refresh();
   setInterval(refresh, REFRESH_S * 1000);
