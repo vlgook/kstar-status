@@ -753,7 +753,8 @@ footer a{color:inherit}
     const sys = String(ver['System Status'] || ''), inv = String(ver['INV Status'] || ''), dcdc = String(ver['DCDC Status'] || '');
     const island = /island|off.?grid/i.test(sys + ' ' + inv);
     const tData = ts(nav.saveTime), age = (Date.now() - tData) / 60000;
-    const online = age <= 10 && String(ST.commun) !== '0';
+    // онлайн = даталогер прислав дані не пізніше 10 хв тому; прапорець порталу communStatus буває застарілим
+    const online = age <= 10;
     const soc = Number(logic.battery_soc), load = Number(logic.load_power) || 0, batt = Number(logic.battery_power) || 0;
     const FL = (faults && faults.list) || [];
     ACTIVE = FL;
@@ -809,7 +810,7 @@ footer a{color:inherit}
       ['Інвертор', tr(inv)],
       ['Батарея (DC/DC)', tr(dcdc)],
       ['Режим роботи', tr(logic.sac)],
-      ['Зв\'язок', '<span class="pill ' + (online ? 'ok">онлайн' : 'off">офлайн') + '</span>'],
+      ['Зв\'язок', '<span class="pill ' + (online ? 'ok">онлайн' : 'off">офлайн') + '</span><small>' + (online ? 'дані надходять' : 'даних немає понад 10 хв') + (String(ST.commun) === '0' && online ? '; портал помилково показує «офлайн»' : '') + '</small>'],
       ['Останні дані', hm(tData) + ', ' + dmy(tData) + '<small>' + ago(age) + '</small>'],
       ['Температура батареї', B['Battery Temperature'] != null ? nf(B['Battery Temperature'], 1) + ' °C' : '–'],
       ['Аварій на порталі', FL.length ? '<span class="pill warn">' + FL.length + '</span>' : '<span class="pill ok">0</span>'],
