@@ -248,7 +248,17 @@ footer a{color:inherit}
   async function updateSince(off, hist, tData, alarmStart) {
     try {
       // мережі немає: точний момент з активної тривоги W00/W02/W03 (до секунди)
-      const r = (off && alarmStart) ? {t: alarmStart, exact: true} : await gridSince(off, hist, tData);
+      // мережа є: час зняття останньої такої тривоги з історії (removeTime)
+      let r = null;
+      if (off && alarmStart) r = {t: alarmStart, exact: true};
+      if (!off) {
+        try {
+          const h = await api('/web/residential/station/detail/history/fault', {stationId: ST.id, pageNumber: 1, pageSize: 30});
+          const ends = ((h && h.list) || []).filter(f => /grid/i.test(f.faultMessage || '') && f.removeTime).map(f => ts(f.removeTime));
+          if (ends.length) r = {t: Math.max(...ends), exact: true};
+        } catch (e) {}
+      }
+      if (!r) r = await gridSince(off, hist, tData);
       if (r.t == null) return;
       const today = new Date(r.t).toDateString() === new Date().toDateString();
       const when = (today ? '' : dmy(r.t) + ', ') + hm(r.t);

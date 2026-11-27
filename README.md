@@ -36,7 +36,8 @@ API порталу не дозволяє запити з інших сайтів
 | Час останніх даних | `GET /api/residential/device/detail/navigation/data?collectId=…` |
 | Статуси системи | `GET /api/residential/device/detail/overview/version?deviceId=…&stime=…` |
 | Модулі, енергія | `GET /api/residential/device/detail/overview/realdata/v2?deviceId=…&stime=…` |
-| Аварії | `POST /api/web/fault/list/real` |
+| Аварії (активні) | `POST /api/web/fault/list/real` |
+| Історія тривог з часом зняття (`removeTime`) | `POST /api/web/residential/station/detail/history/fault` `{stationId, pageNumber, pageSize}` |
 | 5-хвилинна історія за добу (U, f мережі й інвертора) | `GET /api/residential/history/data/kse/list?deviceId=…&stime=YYYY-MM-DD` |
 
 `overview/*` повертає 500 без поточного київського часу в `stime` і заголовка `Accept-Language`.
