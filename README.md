@@ -4,7 +4,7 @@
 
 A compact status page for KSTAR hybrid inverters that runs on top of the [KSTAR Sync](https://sync.ksdatacloud.com/) portal. It was built by a KSTAR system owner in Ukraine, where scheduled and emergency grid outages happen almost daily, to answer the questions the official web and Android apps leave open: *is the grid on right now, since when, how long will the battery last, and how often does this happen?*
 
-Tested on an **E5KS-D22** with two **BluE-Pack** modules (Wi-Fi datalogger, firmware ARM V1.8.12 / DSP V2.2.04). The interface is available in English and Ukrainian (UA/EN switch in the header; the default follows the browser language).
+Tested on an **E5KS-D22** with two **BluE-Pack** modules (Wi-Fi datalogger, firmware ARM V1.8.12 / DSP V2.2.04). It is written to work for any KSTAR Sync account with a residential hybrid system: battery capacity is taken from the BMS, times follow the station's time zone, three-phase values are summed per phase, and accounts with several stations get a station selector. Three-phase models (E…KT) and third-party batteries have not been tested on real hardware yet; feedback is welcome. The interface is available in English and Ukrainian (UA/EN switch in the header; the default follows the browser language).
 
 **Install:** https://vlgook.github.io/kstar-status/
 
@@ -75,7 +75,7 @@ All requests use `Authorization: Bearer <token>` from the portal session.
 
 ## Settings
 
-At the top of the script in `dash.html`: battery capacity (`BATT_KWH`), fallback discharge limit (`MIN_SOC`), refresh interval and nominal cycle life.
+At the top of the script in `dash.html`: fallback battery capacity (`BATT_KWH`, used only when the BMS does not report module capacity), fallback discharge limit (`MIN_SOC`), refresh interval and nominal cycle life.
 
 ## Disclaimer
 

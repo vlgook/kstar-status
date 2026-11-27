@@ -22,6 +22,7 @@ body{font:15px/1.4 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;font-var
 header{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:2px 2px 14px}
 header h1{font-size:18px;margin:0;font-weight:700}
 .upd{color:var(--mute);font-size:13px}
+#stSel{margin:4px 0 2px;max-width:260px;font:inherit;font-size:13px;padding:4px 8px;border-radius:8px;border:1px solid var(--line);background:var(--card);color:var(--ink)}
 #rf{all:unset;cursor:pointer;width:40px;height:40px;border-radius:12px;display:grid;place-items:center;border:1px solid var(--line);background:var(--card);font-size:20px}
 #rf.spin{animation:sp 1s linear infinite}
 @keyframes sp{to{transform:rotate(360deg)}}
@@ -152,7 +153,7 @@ footer a{color:inherit}
 <body>
 <div class="wrap">
   <header>
-    <div><h1 id="name">KSTAR</h1><div class="upd" id="upd" data-i="loading">Завантаження…</div></div>
+    <div><h1 id="name">KSTAR</h1><select id="stSel" hidden></select><div class="upd" id="upd" data-i="loading">Завантаження…</div></div>
     <div class="hbtn"><button id="lang" title="Українська / English">EN</button><button id="lv" data-it="liveTip">⚡<span class="lbl" data-i="liveLbl"> Живий режим</span></button><button id="nt" data-it="notifTip">🔕 Сповіщення</button><button id="rf" data-it="refreshTip">↻</button></div>
   </header>
   <div class="note" id="note"></div>
@@ -218,18 +219,20 @@ footer a{color:inherit}
     <div class="subh" data-ih="vq">Якість мережі: напруга, В <span style="font-weight:500">(пунктир – межі ±10% від 230 В)</span></div>
     <div class="chV"><canvas id="chartV"></canvas></div>
   </section>
-  <footer><span id="dev"></span><a href="https://sync.ksdatacloud.com/" target="_blank" rel="noopener" data-i="portal">Портал KSTAR →</a></footer>
+  <footer><span id="dev"></span><a id="portalLink" href="https://sync.ksdatacloud.com/" target="_blank" rel="noopener" data-i="portal">Портал KSTAR →</a></footer>
 </div>
 
 <script>
 (function () {
   // ---- налаштування ----
-  const BATT_KWH = 10.2;  // ємність батареї, кВт·год
+  const BATT_KWH = 10.2;  // запасне значення ємності, кВт·год (якщо BMS не повідомляє ємність модулів)
   const MIN_SOC = 10;     // до якого рівня рахувати запас, %
   const REFRESH_S = 60;
   const CYCLE_LIFE = 6000; // умовний ресурс LFP, циклів (уточніть за паспортом BluE-Pack)
 
-  const BASE = 'https://sync.ksdatacloud.com/api';
+  const ONPORTAL = /(^|\.)ksdatacloud\.com$/i.test(location.hostname);
+  const ORIGIN = ONPORTAL ? location.origin : 'https://sync.ksdatacloud.com';
+  const BASE = ORIGIN + '/api';
   const TR = {
     'Island Mode': 'Острівний режим', 'Island Running': 'Робота в острові',
     'Grid Mode': 'Робота з мережею', 'Hybrid Mode': 'Гібридний режим', 'Grid-connected': 'Паралельно з мережею',
@@ -277,7 +280,7 @@ footer a{color:inherit}
       oftenOff: r => 'Найчастіше світла немає: <b>' + r + '</b> (у половині днів і частіше)',
       noPattern: (r, p) => 'Сталого графіка не видно. Найчастіше вимикають о <b>' + r + '</b> (' + p + '% днів)', noOut: 'Відключень за період не було',
       noStation: 'Станцію не знайдено', fetchErr: 'Не вдалося отримати дані: ',
-      authNote: 'Сесія порталу закінчилась. <a href="https://sync.ksdatacloud.com/" target="_blank" style="color:inherit">Увійдіть на портал</a>, потім натисніть ↻.',
+      authNote: 'Сесія порталу закінчилась. <a href="/" target="_blank" style="color:inherit">Увійдіть на портал</a>, потім натисніть ↻.',
       cycles: 'циклів', cells: 'комірки', balancing: 'балансування', fwUpd: 'є оновлення', fwOk: 'актуальна',
       updLine: (t, a, s) => 'Дані інвертора ' + t + ' · ' + a + ' · авто кожні ' + s + ' с',
       gridOff: 'Мережі немає', gridOn: 'Мережа є', reserve: 'запас',
@@ -297,7 +300,11 @@ footer a{color:inherit}
       eSelf: 'Власні потреби системи<small style="display:block;font-size:11px">баланс; місяць і рік без поправки на батарею</small>',
       cycBms: 'циклів за лічильником BMS', cycEq: 'еквівалентних повних циклів',
       cycTxt: (p, life) => p + '% від умовних ' + life + ' циклів', cycEnergy: (e, d, k) => ' · за енергією ' + e + ' екв. циклу (' + d + ' / ' + k + ' кВт·год)',
-      charged: 'Заряджено за весь час', discharged: 'Розряджено за весь час', soh: 'Стан (SOH)', sohSrc: 'за BMS модулів'
+      charged: 'Заряджено за весь час', discharged: 'Розряджено за весь час', soh: 'Стан (SOH)', sohSrc: 'за BMS модулів',
+      cap: 'Ємність батареї', capBms: (n, ah) => n + ' × ' + ah + ' А·год за BMS, 51,2 В', capPacks: n => n + ' модул. × 5,12 кВт·год (оцінка)',
+      capCfg: 'значення за замовчуванням, змініть BATT_KWH у dash.html', station: 'Станція',
+      notResi: 'Ця станція не житлова (Residential). Сторінка підтримує лише житлові гібридні системи KSTAR.',
+      noCollector: 'На станції немає даталогера.'
     },
     en: {
       loading: 'Loading…', liveLbl: ' Live mode', liveTip: 'Quick update: the datalogger reports every ~10 s (turns off by itself after 10 min)',
@@ -329,7 +336,7 @@ footer a{color:inherit}
       oftenOff: r => 'The grid is most often down: <b>' + r + '</b> (on half of the days or more)',
       noPattern: (r, p) => 'No stable schedule. Outages are most frequent at <b>' + r + '</b> (' + p + '% of days)', noOut: 'No outages in this period',
       noStation: 'No station found', fetchErr: 'Could not get data: ',
-      authNote: 'The portal session has expired. <a href="https://sync.ksdatacloud.com/" target="_blank" style="color:inherit">Log in to the portal</a>, then press ↻.',
+      authNote: 'The portal session has expired. <a href="/" target="_blank" style="color:inherit">Log in to the portal</a>, then press ↻.',
       cycles: 'cycles', cells: 'cells', balancing: 'balancing', fwUpd: 'update available', fwOk: 'up to date',
       updLine: (t, a, s) => 'Inverter data ' + t + ' · ' + a + ' · auto every ' + s + ' s',
       gridOff: 'Grid down', gridOn: 'Grid on', reserve: 'runtime',
@@ -349,7 +356,11 @@ footer a{color:inherit}
       eSelf: 'System self-consumption<small style="display:block;font-size:11px">energy balance; month and year without battery correction</small>',
       cycBms: 'cycles (BMS counter)', cycEq: 'equivalent full cycles',
       cycTxt: (p, life) => p + '% of a nominal ' + life + ' cycles', cycEnergy: (e, d, k) => ' · by energy ' + e + ' equivalent cycles (' + d + ' / ' + k + ' kWh)',
-      charged: 'Charged, lifetime', discharged: 'Discharged, lifetime', soh: 'State of health (SOH)', sohSrc: 'from module BMS'
+      charged: 'Charged, lifetime', discharged: 'Discharged, lifetime', soh: 'State of health (SOH)', sohSrc: 'from module BMS',
+      cap: 'Battery capacity', capBms: (n, ah) => n + ' × ' + ah + ' Ah from BMS, 51.2 V', capPacks: n => n + ' module(s) × 5.12 kWh (estimate)',
+      capCfg: 'default value, set BATT_KWH in dash.html', station: 'Station',
+      notResi: 'This station is not residential. The page supports KSTAR residential hybrid systems only.',
+      noCollector: 'The station has no datalogger.'
     }
   };
   let LANG = (function () { try { const v = localStorage.getItem('kstarLang'); if (v === 'uk' || v === 'en') return v; } catch (e) {} return /^uk/i.test(navigator.language || '') ? 'uk' : 'en'; })();
@@ -365,7 +376,7 @@ footer a{color:inherit}
   }
   applyStatic();
   let ST = null, busy = false;
-  if (location.origin !== 'https://sync.ksdatacloud.com') {
+  if (!ONPORTAL) {
     document.getElementById('note').style.display = 'block';
     document.getElementById('note').innerHTML = t('onlyBm');
     document.getElementById('upd').textContent = '';
@@ -378,9 +389,24 @@ footer a{color:inherit}
   const K = v => v == null ? '–' : nf(v, 1) + '<small>' + t('kWh') + '</small>';
   const tr = s => !s ? '–' : (LANG === 'uk' && TR[s] ? TR[s] + '<small>' + s + '</small>' : s);
   const num = v => v === undefined || v === null || v === '' ? null : Number(v);
-  const ts = s => new Date(String(s).replace(' ', 'T')).getTime();
-  const dmy = t => { const d = new Date(t); return p2(d.getDate()) + '.' + p2(d.getMonth() + 1); };
-  const hm = t => { const d = new Date(t); return p2(d.getHours()) + ':' + p2(d.getMinutes()); };
+  // ---- час станції: портал віддає і приймає місцевий час станції, а не браузера ----
+  const FMT = {};
+  function tzParts(ms) {
+    const tz = stTz();
+    const f = FMT[tz] || (FMT[tz] = new Intl.DateTimeFormat('en-GB', {timeZone: tz, hourCycle: 'h23', year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit', weekday: 'short'}));
+    const o = {}; f.formatToParts(new Date(ms)).forEach(x => { o[x.type] = x.value; }); return o;
+  }
+  const tzOff = ms => { const o = tzParts(ms); return Date.UTC(+o.year, +o.month - 1, +o.day, +o.hour % 24, +o.minute, +o.second) - Math.floor(ms / 1000) * 1000; };
+  const ts = s => {
+    const m = String(s).match(/(\d{4})-(\d\d)-(\d\d)[ T+](\d\d):(\d\d)(?::(\d\d))?/);
+    if (!m) return NaN;
+    const u = Date.UTC(+m[1], +m[2] - 1, +m[3], +m[4], +m[5], +(m[6] || 0));
+    return u - tzOff(u - tzOff(u));
+  };
+  const dmy = t => { const o = tzParts(t); return o.day + '.' + o.month; };
+  const hm = t => { const o = tzParts(t); return (+o.hour % 24 < 10 ? '0' : '') + (+o.hour % 24) + ':' + o.minute; };
+  const dowIdx = t => ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].indexOf(tzParts(t).weekday);
+  const dayStart = day => ts(day + ' 00:00:00');
   function dur(min) {
     min = Math.max(0, Math.round(min)); const h = Math.floor(min / 60);
     if (h >= 24) return Math.floor(h / 24) + ' ' + t('dD') + ' ' + (h % 24) + ' ' + t('dH');
@@ -427,7 +453,7 @@ footer a{color:inherit}
       }
       if (!r) r = await gridSince(off, hist, tData);
       if (r.t == null) return;
-      const today = new Date(r.t).toDateString() === new Date().toDateString();
+      const today = dmy(r.t) === dmy(Date.now());
       const when = (today ? '' : dmy(r.t) + ', ') + hm(r.t);
       $('stSub').textContent = r.exact ? t('since', when, dur((Date.now() - r.t) / 60000)) : t('sinceOver', dur((Date.now() - r.t) / 60000), when);
     } catch (e) {}
@@ -438,6 +464,8 @@ footer a{color:inherit}
   // дата і час у часовому поясі станції (портал вимагає саме їх)
   const kyivDate = () => new Intl.DateTimeFormat('sv-SE', {timeZone: stTz()}).format(new Date());
   const LS = {get(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }, set(k, v) { try { localStorage.setItem(k, v); } catch (e) {} }};
+  // старі ключі без прив'язки до станції (версії до 27.11.2026)
+  ['kstarUpg', 'kstarDod', 'kstarSelf'].forEach(k => { try { localStorage.removeItem(k); } catch (e) {} });
 
   // ---- сповіщення ----
   let notifyOn = LS.get('kstarNotify') === '1' && window.Notification && Notification.permission === 'granted';
@@ -500,8 +528,7 @@ footer a{color:inherit}
   // ---- тривоги мережі з історії: точні інтервали відключень ----
   let ALM = {list: [], pages: 0, done: false, at: 0}, ACTIVE = [];
   async function alarmIntervals(day) {
-    const start = new Date(day + 'T00:00:00').getTime();
-    return alarmRange(start, start + 864e5);
+    return alarmRange(dayStart(day), dayStart(dayShift(day, 1)));
   }
   async function alarmRange(start, end) {
     if (Date.now() - ALM.at > 5 * 60000) ALM = {list: [], pages: 0, done: false, at: Date.now()};
@@ -539,14 +566,15 @@ footer a{color:inherit}
   function drawChart(hist, day, alm) {
     const T = (hist && hist.title) || [], R = ((hist && hist.dataList) || []).slice().reverse();
     const k = n => T.indexOf(n);
-    const iS = k('Battery State of Charge'), iGV = k('R-phase Grid Voltage'), iGP = k('R-phase Grid Meter Power'), iIP = k('R-phase Inverter Power');
-    const x0 = new Date(day + 'T00:00:00').getTime(), x1 = x0 + 864e5;
+    const iS = k('Battery State of Charge'), iGV = k('R-phase Grid Voltage');
+    const sumK = (r, f) => ['R', 'S', 'T'].reduce((a, x) => { const i = k(x + '-phase ' + f); return i >= 0 ? a + (Number(r[i]) || 0) : a; }, 0);
+    const x0 = dayStart(day), x1 = dayStart(dayShift(day, 1));
     const soc = [], load = [], grid = [], bands = [];
     let bs = null, prevT = null, minSoc = 101, maxLoad = 0, offMin = 0;
     R.forEach(r => {
       const t = ts(r[0]);
       if (prevT && t - prevT > 16 * 60000) { [soc, load, grid].forEach(a => a.push({x: t - 1, y: null})); }
-      const gp = Number(r[iGP]) || 0, ip = Number(r[iIP]) || 0, gv = Number(r[iGV]) || 0, sc = Number(r[iS]);
+      const gp = sumK(r, 'Grid Meter Power'), ip = sumK(r, 'Inverter Power'), gv = Number(r[iGV]) || 0, sc = Number(r[iS]);
       const ld = Math.max(0, ip - gp);
       soc.push({x: t, y: sc}); load.push({x: t, y: ld}); grid.push({x: t, y: Math.max(0, -gp)});
       minSoc = Math.min(minSoc, sc); maxLoad = Math.max(maxLoad, ld);
@@ -665,9 +693,9 @@ footer a{color:inherit}
   let UPG = null, DOD = null;
   function lsJson(k) { try { return JSON.parse(LS.get(k)); } catch (e) { return null; } }
   async function loadUpgrade() {
-    const c = lsJson('kstarUpg');
+    const c = lsJson('kstarUpg_' + ST.id);
     if (c && Date.now() - c.at < 3600e3) { UPG = c.v; return; }
-    try { UPG = await api('/web/station/detail/need/upgarde/V2?stationId=' + ST.id); LS.set('kstarUpg', JSON.stringify({at: Date.now(), v: UPG})); } catch (e) {}
+    try { UPG = await api('/web/station/detail/need/upgarde/V2?stationId=' + ST.id); LS.set('kstarUpg_' + ST.id, JSON.stringify({at: Date.now(), v: UPG})); } catch (e) {}
   }
   async function readParam(setItem, command) {
     const r = await api('/residential/kse/remote/readvalue', {deviceId: ST.cid, setItem: setItem, command: String(command), coefficient: 1, registerCount: 1});
@@ -680,11 +708,11 @@ footer a{color:inherit}
     return null;
   }
   async function loadDod() {
-    const c = lsJson('kstarDod');
+    const c = lsJson('kstarDod_' + ST.id);
     if (c && Date.now() - c.at < 24 * 3600e3) { DOD = c; return; }
     try {
       const dod = await readParam('offgriddod', 3061), dde = await readParam('dde', 3059);
-      if (dod != null) { DOD = {at: Date.now(), dod: Number(dod), dde: dde == null ? null : Number(dde)}; LS.set('kstarDod', JSON.stringify(DOD)); }
+      if (dod != null) { DOD = {at: Date.now(), dod: Number(dod), dde: dde == null ? null : Number(dde)}; LS.set('kstarDod_' + ST.id, JSON.stringify(DOD)); }
     } catch (e) {}
   }
   const minSocEff = () => (DOD && DOD.dde !== 0 && DOD.dod > 0) ? 100 - DOD.dod : MIN_SOC;
@@ -725,8 +753,8 @@ footer a{color:inherit}
   let oDays = 14;
   async function loadOutStats() {
     if (!ST) return;
-    const today0 = new Date(kyivDate() + 'T00:00:00').getTime();
-    const start = today0 - (oDays - 1) * 864e5, now = Date.now();
+    const todayS = kyivDate(), today0 = dayStart(todayS);
+    const start = dayStart(dayShift(todayS, -(oDays - 1))), now = Date.now();
     let iv;
     try { iv = await alarmRange(start, now); } catch (e) { iv = null; }
     if (!iv) { $('oNote').textContent = t('noCover'); return; }
@@ -748,14 +776,14 @@ footer a{color:inherit}
     const hourHits = new Array(24).fill(0);
     let rows = '', daysWithData = 0;
     for (let i = 0; i < oDays; i++) {
-      const d0 = today0 - i * 864e5, d1 = d0 + 864e5, d = new Date(d0 + 12 * 3600e3);
+      const dS = dayShift(todayS, -i), d0 = dayStart(dS), d1 = dayStart(dayShift(dS, 1)), dw = dowIdx(d0 + 12 * 3600e3);
       const noData = d1 <= oldest && !ALM.done;
       const segs = iv.filter(v => v[1] > d0 && v[0] < d1).map(v => [Math.max(v[0], d0), Math.min(v[1], d1, now)]);
       if (!noData) daysWithData++;
       for (let h = 0; h < 24; h++) { const a = d0 + h * 3600e3, b = a + 3600e3; if (segs.some(v => v[1] > a && v[0] < b)) hourHits[h]++; }
-      const we = d.getDay() === 0 || d.getDay() === 6;
-      rows += '<div class="dl' + (we ? ' we' : '') + '">' + L_().DOW[d.getDay()] + ' ' + p2(d.getDate()) + '.' + p2(d.getMonth() + 1) + '</div><div class="tr' + (noData ? ' nod' : '') + '">' +
-        segs.map(v => { const l = (v[0] - d0) / 864e5 * 100, w = (v[1] - v[0]) / 864e5 * 100, sh = v[1] - v[0] < SHORT;
+      const we = dw === 0 || dw === 6;
+      rows += '<div class="dl' + (we ? ' we' : '') + '">' + L_().DOW[dw] + ' ' + dS.slice(8, 10) + '.' + dS.slice(5, 7) + '</div><div class="tr' + (noData ? ' nod' : '') + '">' +
+        segs.map(v => { const l = (v[0] - d0) / (d1 - d0) * 100, w = (v[1] - v[0]) / (d1 - d0) * 100, sh = v[1] - v[0] < SHORT;
           return '<i' + (sh ? ' class="sh"' : '') + ' style="left:' + l.toFixed(2) + '%;width:' + w.toFixed(2) + '%" title="' + hm(v[0]) + '–' + hm(v[1]) + ' (' + dur((v[1] - v[0]) / 60000) + ')"></i>'; }).join('') + '</div>';
     }
     rows += '<div></div><div class="axis">' + [0, 6, 12, 18, 24].map(h => '<span style="left:' + (h / 24 * 100) + '%">' + h + '</span>').join('') + '</div>';
@@ -804,26 +832,52 @@ footer a{color:inherit}
       hour: '2-digit', minute: '2-digit', second: '2-digit', hourCycle: 'h23'}).format(new Date()).replace(' ', '+');
   }
 
+  // ---- вибір станції: зі сторінки порталу (/station/<id>/…), збережений вибір або перша у списку ----
+  let STLIST = null, pathSid;
+  async function pickStation() {
+    if (pathSid === undefined) {
+      pathSid = null;
+      try { const m = ((window.opener && window.opener.location.pathname) || location.pathname).match(/station\/(\d+)/); if (m) pathSid = m[1]; } catch (e) {}
+    }
+    if (!STLIST) {
+      const sl = await api('/web/station/list/page/v2', {current: 1, size: 100});
+      STLIST = (sl && sl.list) || [];
+    }
+    const inList = id => STLIST.some(x => String(x.stationId) === String(id));
+    let sid = pathSid || LS.get('kstarStation');
+    if (!sid || (!inList(sid) && sid !== pathSid)) sid = STLIST[0] && STLIST[0].stationId;
+    if (!sid) throw new Error(t('noStation'));
+    const info = await api('/web/station/manager/getinfo?stationId=' + sid);
+    const li = STLIST.find(x => String(x.stationId) === String(sid));
+    let tz = info.timeZone || 'Europe/Kiev';
+    try { new Intl.DateTimeFormat('en', {timeZone: tz}); } catch (e) { tz = tz === 'Europe/Kyiv' ? 'Europe/Kiev' : Intl.DateTimeFormat().resolvedOptions().timeZone; }
+    ST = {id: String(sid), name: info.stationName, cid: (info.collectList || [])[0], tz: tz, type: info.stationType, commun: li ? li.communStatus : null};
+    if (ST.type != null && Number(ST.type) !== 1) throw new Error(t('notResi'));
+    if (!ST.cid) throw new Error(t('noCollector'));
+    const sel = $('stSel');
+    const opts = STLIST.map(x => [String(x.stationId), x.stationName]);
+    if (!inList(ST.id)) opts.unshift([ST.id, ST.name]);
+    if (opts.length > 1) {
+      sel.innerHTML = opts.map(o => '<option value="' + o[0] + '"' + (o[0] === ST.id ? ' selected' : '') + '>' + String(o[1]).replace(/</g, '&lt;') + '</option>').join('');
+      sel.hidden = false; sel.title = t('station');
+    }
+  }
+  $('stSel').addEventListener('change', e => {
+    LS.set('kstarStation', e.target.value); pathSid = null;
+    if (LIVE) liveStop(true);
+    ST = null; LAST = null; UPG = null; DOD = null; prev = null; chartDay = null;
+    ALM = {list: [], pages: 0, done: false, at: 0};
+    Object.keys(histCache).forEach(k => delete histCache[k]);
+    refresh.statsAt = 0; $('stSub').textContent = '';
+    refresh();
+  });
+
   async function refresh() {
     if (busy) return;
     busy = true; $('rf').classList.add('spin');
     try {
       if (!token()) throw new Error('AUTH');
-      if (!ST) {
-        // станція зі сторінки порталу, з якої натиснули закладку (/station/<id>/…), інакше перша у списку
-        let sid = null;
-        try { const m = ((window.opener && window.opener.location.pathname) || location.pathname).match(/station\/(\d+)/); if (m) sid = m[1]; } catch (e) {}
-        let commun = null;
-        if (!sid) {
-          const stations = await api('/web/station/list/page/v2', {current: 1, size: 20});
-          const s0 = stations.list && stations.list[0];
-          if (!s0) throw new Error(t('noStation'));
-          sid = s0.stationId; commun = s0.communStatus;
-        }
-        const info = await api('/web/station/manager/getinfo?stationId=' + sid);
-        ST = {id: sid, name: info.stationName, cid: (info.collectList || [])[0], tz: info.timeZone || 'Europe/Kiev', commun: commun};
-        if (!ST.cid) throw new Error(t('noStation'));
-      }
+      if (!ST) await pickStation();
       const id = ST.cid, t = stime();
       const r = await Promise.allSettled([
         api('/residential/device/detail/logic?collectId=' + id + '&refreshFlag=false'),
@@ -877,7 +931,7 @@ footer a{color:inherit}
     const cur = {arm: ver['ARM Version'], dsp: ver['DSP Version']};
     // кеш застарів: інвертор уже звітує іншу версію, ніж та, з якою пропонувалось оновлення
     if (L.some(x => cur[String(x.deviceType).toLowerCase()] && cur[String(x.deviceType).toLowerCase()] !== x.deviceVersion)) {
-      LS.set('kstarUpg', ''); UPG = null; loadUpgrade().then(() => { if (LAST) render.apply(null, LAST); });
+      LS.set('kstarUpg_' + ST.id, ''); UPG = null; loadUpgrade().then(() => { if (LAST) render.apply(null, LAST); });
     }
     const up = L.filter(x => x.targetVersion && x.targetVersion !== x.deviceVersion && cur[String(x.deviceType).toLowerCase()] !== x.targetVersion);
     if (up.length) return '<span class="pill warn">' + t('fwUpd') + '</span><small>' + up.map(x => String(x.deviceType).toUpperCase() + ' ' + x.deviceVersion + ' → ' + x.targetVersion).join(', ') + '</small>';
@@ -885,7 +939,23 @@ footer a{color:inherit}
     return 'ARM ' + (ver['ARM Version'] || '–') + '<small>DSP ' + (ver['DSP Version'] || '–') + '</small>';
   }
 
+  // ємність: проєктна ємність модулів з BMS × 51,2 В; інакше кількість модулів × 5,12 кВт·год; інакше BATT_KWH
+  let CAP = {kwh: BATT_KWH, src: 'cfg'};
+  function capacity(ver, bms) {
+    const T = (bms && bms.title) || [], D = (bms && bms.dataList) || [];
+    const ik = T.indexOf('Battery Pack'), ia = T.indexOf('Battery Pack Design Rated Capacity');
+    const per = {};
+    if (ik >= 0 && ia >= 0) D.forEach(r => { const k = r[ik], a = Number(r[ia]); if (per[k] == null && a > 0) per[k] = a; });
+    const ah = Object.values(per);
+    if (ah.length) return {kwh: ah.reduce((x, y) => x + y, 0) * 51.2 / 1000, src: 'bms', n: ah.length, ah: ah[0], same: ah.every(x => x === ah[0])};
+    const np = Number(ver && ver['Number of Battery Packs']);
+    if (np > 0) return {kwh: np * 5.12, src: 'packs', n: np};
+    return {kwh: BATT_KWH, src: 'cfg'};
+  }
+
   function render(logic, nav, ver, real, faults, hist, bms) {
+    CAP = capacity(ver, bms);
+    const BATT_KWH = CAP.kwh;
     const sys = String(ver['System Status'] || ''), inv = String(ver['INV Status'] || ''), dcdc = String(ver['DCDC Status'] || '');
     const island = /island|off.?grid/i.test(sys + ' ' + inv);
     const tData = ts(nav.saveTime), age = (Date.now() - tData) / 60000;
@@ -897,6 +967,7 @@ footer a{color:inherit}
 
     document.title = (island ? '🔴 ' : '🟢 ') + nf(soc) + '% · KSTAR';
     $('name').textContent = ST.name || 'KSTAR';
+    $('name').hidden = !$('stSel').hidden;
     $('upd').textContent = t('updLine', hm(tData), ago(age), REFRESH_S);
 
     // мережа
@@ -989,28 +1060,33 @@ footer a{color:inherit}
     const hcol = name => HT.indexOf(name);
     const at = (row, name) => { const i = hcol(name); return row && i >= 0 ? num(row[i]) : null; };
     const H0 = HD[0];
+    // однофазні моделі віддають лише R-phase; для трифазних підсумовуємо R/S/T або показуємо через «/»
+    const PHS = ['R', 'S', 'T'];
+    const phv = (row, f) => PHS.map(x => at(row, x + '-phase ' + f)).filter(v => v != null);
+    const psum = (row, f) => { const v = phv(row, f); return v.length ? v.reduce((a, b) => a + b, 0) : null; };
+    const plist = (row, f, u, d) => { const v = phv(row, f); return v.length ? v.map(x => nf(x, d)).join(' / ') + ' ' + u : '–'; };
     const gv = HD.map(r => at(r, 'R-phase Grid Voltage')).filter(x => x > 50);
     const unit = (v, u, d) => v == null ? '–' : nf(v, d) + ' ' + u;
     // власні потреби: під час відключення DC з батареї мінус AC на виході інвертора
     const isl = HD.filter(r => (at(r, 'R-phase Grid Voltage') || 0) < 50 && (at(r, 'Battery Current') || 0) > 0.5)
-      .map(r => at(r, 'Battery Voltage') * at(r, 'Battery Current') - (at(r, 'R-phase Inverter Power') || 0))
+      .map(r => at(r, 'Battery Voltage') * at(r, 'Battery Current') - (psum(r, 'Inverter Power') || 0))
       .filter(x => x > 0 && x < 300);
     let selfW = isl.length >= 3 ? isl.reduce((a, x) => a + x, 0) / isl.length : null, selfSrc = t('selfToday', isl.length);
-    if (selfW != null) LS.set('kstarSelf', JSON.stringify({w: selfW, d: kyivDate()}));
-    else { const c = lsJson('kstarSelf'); if (c) { selfW = c.w; selfSrc = t('selfFrom', c.d.slice(8, 10) + '.' + c.d.slice(5, 7)); } }
-    const selfNow = (island && H0 && (at(H0, 'Battery Current') || 0) > 0.5) ? at(H0, 'Battery Voltage') * at(H0, 'Battery Current') - (at(H0, 'R-phase Inverter Power') || 0) : null;
+    if (selfW != null) LS.set('kstarSelf_' + ST.id, JSON.stringify({w: selfW, d: kyivDate()}));
+    else { const c = lsJson('kstarSelf_' + ST.id); if (c) { selfW = c.w; selfSrc = t('selfFrom', c.d.slice(8, 10) + '.' + c.d.slice(5, 7)); } }
+    const selfNow = (island && H0 && (at(H0, 'Battery Current') || 0) > 0.5) ? at(H0, 'Battery Voltage') * at(H0, 'Battery Current') - (psum(H0, 'Inverter Power') || 0) : null;
     $('fLoadSub').textContent = island && selfW != null ? t('houseInv', nf(selfW)) : t('house');
     const eRows = H0 ? [
-      [t('gridV'), island ? '<span class="pill off">0 ' + t('V') + '</span>' : unit(at(H0, 'R-phase Grid Voltage'), t('V'), 1),
+      [t('gridV'), island ? '<span class="pill off">0 ' + t('V') + '</span>' : plist(H0, 'Grid Voltage', t('V'), 1),
         gv.length ? t('todayRange', nf(Math.min(...gv), 0), nf(Math.max(...gv), 0)) : t('noGridToday')],
       [t('gridF'), island ? '–' : unit(at(H0, 'R-phase Grid Frequency'), t('Hz'), 2), ''],
-      [t('gridP'), unit(at(H0, 'R-phase Grid Meter Power'), t('W')), ''],
-      [t('invOut'), unit(at(H0, 'R-phase Inverter Voltage'), t('V'), 1) + ' · ' + unit(at(H0, 'R-phase Inverter Frequency'), t('Hz'), 2),
-        unit(at(H0, 'R-phase Inverter Power'), t('W')) + ', ' + unit(at(H0, 'R-phase Inverter Current'), t('A'), 2)],
-      [t('backup'), unit(at(H0, 'R-phase Backup Voltage'), t('V'), 1), unit(at(H0, 'R-phase Backup Current'), t('A'), 2)],
+      [t('gridP'), unit(psum(H0, 'Grid Meter Power'), t('W')), ''],
+      [t('invOut'), plist(H0, 'Inverter Voltage', t('V'), 1) + ' · ' + unit(at(H0, 'R-phase Inverter Frequency'), t('Hz'), 2),
+        unit(psum(H0, 'Inverter Power'), t('W')) + ', ' + plist(H0, 'Inverter Current', t('A'), 2)],
+      [t('backup'), plist(H0, 'Backup Voltage', t('V'), 1), plist(H0, 'Backup Current', t('A'), 2)],
       ...(num(ver['INV Max Output Current (A)']) ? (() => {
-        const mx = num(ver['INV Max Output Current (A)']), cur = Math.abs(at(H0, 'R-phase Inverter Current') || 0);
-        const kw = mx * (at(H0, 'R-phase Inverter Voltage') || 230) / 1000, pct = cur / mx * 100;
+        const mx = num(ver['INV Max Output Current (A)']), cur = Math.max(0, ...phv(H0, 'Inverter Current').map(Math.abs));
+        const kw = mx * (at(H0, 'R-phase Inverter Voltage') || 230) * Math.max(1, phv(H0, 'Inverter Voltage').length) / 1000, pct = cur / mx * 100;
         return [[t('limit'), nf(mx, 1) + ' ' + t('A') + ' · ~' + nf(kw, 1) + ' ' + t('kW'),
           t('nowA', nf(cur, 2), pct >= 80 ? '<span style="color:var(--warn)">' + nf(pct) + '%</span>' : nf(pct) + '%')]];
       })() : []),
@@ -1051,6 +1127,7 @@ footer a{color:inherit}
     $('cycTxt').textContent = cyc == null ? '' : t('cycTxt', nf(cyc / CYCLE_LIFE * 100, 2), nf(CYCLE_LIFE)) +
       (eqc != null ? t('cycEnergy', nf(eqc, 1), nf(tDis, 0), nf(BATT_KWH, 1)) : '');
     const resRows = [
+      [t('cap'), nf(CAP.kwh, 1) + ' ' + t('kWh') + '<small>' + (CAP.src === 'bms' ? (CAP.same ? t('capBms', CAP.n, nf(CAP.ah)) : t('capBms', CAP.n, '…')) : CAP.src === 'packs' ? t('capPacks', CAP.n) : t('capCfg')) + '</small>'],
       [t('charged'), tChg == null ? '–' : nf(tChg, 0) + ' ' + t('kWh')],
       [t('discharged'), tDis == null ? '–' : nf(tDis, 0) + ' ' + t('kWh')],
     ].concat(BMS.filter(Boolean).length ? [[t('soh'), BMS.filter(Boolean).map(r => nf(bv(r, 'Battery State of Health')) + '%').join(' / ') + '<small>' + t('sohSrc') + '</small>']] : []);
