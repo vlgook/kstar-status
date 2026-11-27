@@ -543,7 +543,7 @@ footer a{color:inherit}
   function lsJson(k) { try { return JSON.parse(LS.get(k)); } catch (e) { return null; } }
   async function loadUpgrade() {
     const c = lsJson('kstarUpg');
-    if (c && Date.now() - c.at < 6 * 3600e3) { UPG = c.v; return; }
+    if (c && Date.now() - c.at < 3600e3) { UPG = c.v; return; }
     try { UPG = await api('/web/station/detail/need/upgarde/V2?stationId=' + ST.id); LS.set('kstarUpg', JSON.stringify({at: Date.now(), v: UPG})); } catch (e) {}
   }
   async function readParam(setItem, command) {
@@ -743,7 +743,12 @@ footer a{color:inherit}
 
   function fwCell(ver) {
     const L = (UPG && UPG.list) || [];
-    const up = L.filter(x => x.targetVersion && x.targetVersion !== x.deviceVersion);
+    const cur = {arm: ver['ARM Version'], dsp: ver['DSP Version']};
+    // кеш застарів: інвертор уже звітує іншу версію, ніж та, з якою пропонувалось оновлення
+    if (L.some(x => cur[String(x.deviceType).toLowerCase()] && cur[String(x.deviceType).toLowerCase()] !== x.deviceVersion)) {
+      LS.set('kstarUpg', ''); UPG = null; loadUpgrade().then(() => { if (LAST) render.apply(null, LAST); });
+    }
+    const up = L.filter(x => x.targetVersion && x.targetVersion !== x.deviceVersion && cur[String(x.deviceType).toLowerCase()] !== x.targetVersion);
     if (up.length) return '<span class="pill warn">є оновлення</span><small>' + up.map(x => String(x.deviceType).toUpperCase() + ' ' + x.deviceVersion + ' → ' + x.targetVersion).join(', ') + '</small>';
     if (UPG) return '<span class="pill ok">актуальна</span><small>ARM ' + (ver['ARM Version'] || '–') + ', DSP ' + (ver['DSP Version'] || '–') + '</small>';
     return 'ARM ' + (ver['ARM Version'] || '–') + '<small>DSP ' + (ver['DSP Version'] || '–') + '</small>';
