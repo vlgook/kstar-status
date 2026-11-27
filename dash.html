@@ -870,7 +870,7 @@ footer a{color:inherit}
     const isl = HD.filter(r => (at(r, 'R-phase Grid Voltage') || 0) < 50 && (at(r, 'Battery Current') || 0) > 0.5)
       .map(r => at(r, 'Battery Voltage') * at(r, 'Battery Current') - (at(r, 'R-phase Inverter Power') || 0))
       .filter(x => x > 0 && x < 300);
-    let selfW = isl.length >= 3 ? isl.reduce((a, x) => a + x, 0) / isl.length : null, selfSrc = 'сьогодні, ' + isl.length + ' записів без мережі';
+    let selfW = isl.length >= 3 ? isl.reduce((a, x) => a + x, 0) / isl.length : null, selfSrc = 'сьогодні, ' + isl.length + ' ' + (isl.length % 10 >= 2 && isl.length % 10 <= 4 && (isl.length % 100 < 12 || isl.length % 100 > 14) ? 'записи' : isl.length % 10 === 1 && isl.length % 100 !== 11 ? 'запис' : 'записів') + ' без мережі';
     if (selfW != null) LS.set('kstarSelf', JSON.stringify({w: selfW, d: kyivDate()}));
     else { const c = lsJson('kstarSelf'); if (c) { selfW = c.w; selfSrc = 'за відключенням ' + c.d.slice(8, 10) + '.' + c.d.slice(5, 7); } }
     const selfNow = (island && H0 && (at(H0, 'Battery Current') || 0) > 0.5) ? at(H0, 'Battery Voltage') * at(H0, 'Battery Current') - (at(H0, 'R-phase Inverter Power') || 0) : null;
@@ -908,7 +908,7 @@ footer a{color:inherit}
       ['Віддано в мережу', G['Daily Energy Consumption Sell'], G['Monthly Energy Consumption Sell'], G['Yearly Energy Consumption Sell'], G['Total Energy Consumption Sell']]
     ];
     // власні потреби за балансом: (з мережі + сонце + розряд) − (будинок + заряд + експорт)
-    const bal = (imp, pv, dis, ld, chg, ex) => [imp, ld].some(x => num(x) == null) ? null : Math.max(0, num(imp) + (num(pv) || 0) + (num(dis) || 0) - num(ld) - (num(chg) || 0) - (num(ex) || 0));
+    const bal = (imp, pv, dis, ld, chg, ex) => { if ([imp, ld].some(x => num(x) == null)) return null; const v = num(imp) + (num(pv) || 0) + (num(dis) || 0) - num(ld) - (num(chg) || 0) - (num(ex) || 0); return v > 0.05 ? v : null; };
     en.push(['Власні потреби системи<small style="display:block;font-size:11px">баланс; місяць і рік без поправки на батарею</small>',
       bal(G['Daily Energy Consumption Purchase'], PV['PV Daily Generation'], B['Battery Daily Discharge Energy'], L['Daily Load Energy Consumption'], B['Battery Daily Charge Energy'], G['Daily Energy Consumption Sell']),
       bal(G['Monthly Energy Consumption Purchase'], PV['PV Monthly Generation'], 0, L['Monthly Load Energy Consumption'], 0, G['Monthly Energy Consumption Sell']),
