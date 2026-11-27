@@ -111,6 +111,7 @@ table.en td small{color:var(--mute);font-weight:500;font-size:11px;margin-left:2
 @media (min-width:760px){.chbox{height:320px}}
 .dsum{display:flex;gap:8px 20px;flex-wrap:wrap;margin-top:12px;font-size:13px;color:var(--mute)}
 .dsum b{color:var(--ink);font-weight:700}
+.dsum small{font-size:11px;opacity:.8}
 .kv{display:grid;grid-template-columns:repeat(2,1fr);gap:14px 16px}
 .kv label{display:block;color:var(--mute);font-size:12px}
 .kv b{font-size:20px;font-weight:700}
@@ -329,6 +330,29 @@ footer a{color:inherit}
     chartDay = x >= today ? null : x;
     loadChart(null);
   }
+  // ---- тривоги мережі з історії: точні інтервали відключень ----
+  let ALM = {list: [], pages: 0, done: false, at: 0}, ACTIVE = [];
+  async function alarmIntervals(day) {
+    const start = new Date(day + 'T00:00:00').getTime(), end = start + 864e5;
+    if (Date.now() - ALM.at > 5 * 60000) ALM = {list: [], pages: 0, done: false, at: Date.now()};
+    while (!ALM.done && ALM.pages < 10 && (!ALM.list.length || ts(ALM.list[ALM.list.length - 1].saveTime) > start)) {
+      const h = await api('/web/residential/station/detail/history/fault', {stationId: ST.id, pageNumber: ALM.pages + 1, pageSize: 200});
+      const l = (h && h.list) || [];
+      ALM.list = ALM.list.concat(l); ALM.pages++;
+      if (l.length < 200) ALM.done = true;
+    }
+    const covered = ALM.done || (ALM.list.length && ts(ALM.list[ALM.list.length - 1].saveTime) <= start);
+    if (!covered) return null;
+    const iv = ALM.list.concat(ACTIVE)
+      .filter(f => /grid/i.test(f.faultMessage || ''))
+      .map(f => [ts(f.saveTime), f.removeTime ? ts(f.removeTime) : Date.now()])
+      .filter(v => v[1] > start && v[0] < end)
+      .sort((a, b) => a[0] - b[0]);
+    const m = [];
+    iv.forEach(v => { const l = m[m.length - 1]; if (l && v[0] <= l[1] + 1000) l[1] = Math.max(l[1], v[1]); else m.push(v.slice()); });
+    return m;
+  }
+
   async function loadChart(histToday) {
     const day = chartDay || kyivDate();
     const d = new Date(day + 'T12:00:00Z');
@@ -337,10 +361,12 @@ footer a{color:inherit}
     try {
       const h = (!chartDay && histToday) ? histToday : await api('/residential/history/data/kse/list?deviceId=' + ST.cid + '&stime=' + day);
       await needChart();
-      drawChart(h, day);
+      let alm = null;
+      try { alm = await alarmIntervals(day); } catch (e) {}
+      drawChart(h, day, alm);
     } catch (e) { $('dsum').textContent = 'Не вдалося завантажити графік: ' + e.message; }
   }
-  function drawChart(hist, day) {
+  function drawChart(hist, day, alm) {
     const T = (hist && hist.title) || [], R = ((hist && hist.dataList) || []).slice().reverse();
     const k = n => T.indexOf(n);
     const iS = k('Battery State of Charge'), iGV = k('R-phase Grid Voltage'), iGP = k('R-phase Grid Meter Power'), iIP = k('R-phase Inverter Power');
@@ -360,14 +386,28 @@ footer a{color:inherit}
       prevT = t;
     });
     if (bs !== null) bands.push([bs, chartDay ? Math.min(x1, prevT + 5 * 60000) : Date.now()]);
+    // точні інтервали з тривог замінюють 5-хвилинні, якщо історія покриває цей день
+    const exact = Array.isArray(alm);
+    if (exact) { bands.length = 0; alm.forEach(v => bands.push([Math.max(x0, v[0]), Math.min(x1, v[1])])); }
     bands.forEach(b => { offMin += (b[1] - b[0]) / 60000; });
+    const SHORT = 5 * 60000;
+    const longB = bands.filter(b => b[1] - b[0] >= SHORT), shortB = bands.filter(b => b[1] - b[0] < SHORT);
 
     const cSoc = cssv('--batt'), cLoad = cssv('--warn'), cGrid = cssv('--ok'), cOff = cssv('--off'), ink = cssv('--mute'), line = cssv('--line');
     $('lgSoc').style.background = cSoc; $('lgLoad').style.background = cLoad; $('lgGrid').style.background = cGrid; $('lgOff').style.background = alpha(cOff, .25);
 
     const sum = [];
     if (R.length) {
-      sum.push(bands.length ? 'Без мережі: <b>' + bands.map(b => hm(b[0]) + '–' + (!chartDay && b[1] >= Date.now() - 60000 ? 'зараз' : hm(b[1]))).join(', ') + '</b> (' + dur(offMin) + ')' : 'Мережа була <b>весь день</b>');
+      const fmtB = b => hm(b[0]) + '–' + (!chartDay && b[1] >= Date.now() - 60000 ? 'зараз' : hm(b[1]));
+      if (!bands.length) sum.push('Мережа була <b>весь день</b>');
+      else {
+        if (longB.length) sum.push('Без мережі: <b>' + longB.map(fmtB).join(', ') + '</b> (' + dur(offMin) + ')');
+        if (shortB.length) {
+          const secs = shortB.map(b => Math.round((b[1] - b[0]) / 1000));
+          sum.push((longB.length ? 'і ' : 'Мережа блимала: ') + '<b>' + shortB.length + ' ' + (shortB.length === 1 ? 'короткий провал' : shortB.length < 5 ? 'короткі провали' : 'коротких провалів') + '</b> (' + shortB.map(b => hm(b[0])).join(', ') + '; ' + (Math.max(...secs) < 60 ? 'до ' + Math.max(...secs) + ' с' : 'до ' + Math.ceil(Math.max(...secs) / 60) + ' хв') + ')');
+        }
+      }
+      sum.push(exact ? '<small>за журналом тривог</small>' : '<small>за 5-хв записами</small>');
       sum.push('Мін. SoC <b>' + nf(minSoc) + '%</b>');
       sum.push('Пік навантаження <b>' + nf(maxLoad) + ' Вт</b>');
     } else sum.push('За цей день даних немає');
@@ -376,6 +416,9 @@ footer a{color:inherit}
     const bandsPlugin = {id: 'offBands', beforeDatasetsDraw(c) {
       const {ctx, chartArea: a, scales: {x}} = c; ctx.save(); ctx.fillStyle = alpha(cOff, .14);
       bands.forEach(([s0, e0]) => { const p1 = Math.max(a.left, x.getPixelForValue(s0)), p2_ = Math.min(a.right, x.getPixelForValue(e0)); if (p2_ > p1) ctx.fillRect(p1, a.top, p2_ - p1, a.bottom - a.top); });
+      // короткі провали: тонка яскрава мітка, щоб не губились на масштабі доби
+      ctx.fillStyle = alpha(cOff, .85);
+      shortB.forEach(([s0]) => { const p = x.getPixelForValue(s0); if (p >= a.left && p <= a.right) { ctx.fillRect(p - 1, a.top, 2, a.bottom - a.top); ctx.beginPath(); ctx.arc(p, a.top + 4, 3.5, 0, 7); ctx.fill(); } });
       ctx.restore();
     }};
     const cfg = {
@@ -475,6 +518,7 @@ footer a{color:inherit}
     const online = age <= 10 && String(ST.commun) !== '0';
     const soc = Number(logic.battery_soc), load = Number(logic.load_power) || 0, batt = Number(logic.battery_power) || 0;
     const FL = (faults && faults.list) || [];
+    ACTIVE = FL;
 
     document.title = (island ? '🔴 ' : '🟢 ') + nf(soc) + '% · KSTAR';
     $('name').textContent = ST.name || 'KSTAR';
