@@ -164,7 +164,7 @@ footer a{color:inherit}
     </div>
     <div class="bar"><i id="socBar" style="width:0"></i><span class="mk" style="left:15%"></span><span class="mk" style="left:30%"></span></div>
     <div class="flows">
-      <div class="flow"><label>Навантаження</label><b id="fLoad">–</b><div class="sub">будинок</div></div>
+      <div class="flow"><label>Навантаження</label><b id="fLoad">–</b><div class="sub" id="fLoadSub">будинок</div></div>
       <div class="flow"><label>Батарея</label><b id="fBatt">–</b><div class="sub" id="fBattSub">&nbsp;</div></div>
       <div class="flow"><label>Мережа</label><b id="fGrid">–</b><div class="sub" id="fGridSub">&nbsp;</div></div>
       <div class="flow"><label>Сонце</label><b id="fPv">–</b><div class="sub" id="fPvSub">&nbsp;</div></div>
@@ -866,6 +866,15 @@ footer a{color:inherit}
     const H0 = HD[0];
     const gv = HD.map(r => at(r, 'R-phase Grid Voltage')).filter(x => x > 50);
     const unit = (v, u, d) => v == null ? '–' : nf(v, d) + ' ' + u;
+    // власні потреби: під час відключення DC з батареї мінус AC на виході інвертора
+    const isl = HD.filter(r => (at(r, 'R-phase Grid Voltage') || 0) < 50 && (at(r, 'Battery Current') || 0) > 0.5)
+      .map(r => at(r, 'Battery Voltage') * at(r, 'Battery Current') - (at(r, 'R-phase Inverter Power') || 0))
+      .filter(x => x > 0 && x < 300);
+    let selfW = isl.length >= 3 ? isl.reduce((a, x) => a + x, 0) / isl.length : null, selfSrc = 'сьогодні, ' + isl.length + ' записів без мережі';
+    if (selfW != null) LS.set('kstarSelf', JSON.stringify({w: selfW, d: kyivDate()}));
+    else { const c = lsJson('kstarSelf'); if (c) { selfW = c.w; selfSrc = 'за відключенням ' + c.d.slice(8, 10) + '.' + c.d.slice(5, 7); } }
+    const selfNow = (island && H0 && (at(H0, 'Battery Current') || 0) > 0.5) ? at(H0, 'Battery Voltage') * at(H0, 'Battery Current') - (at(H0, 'R-phase Inverter Power') || 0) : null;
+    $('fLoadSub').textContent = island && selfW != null ? 'будинок + ~' + nf(selfW) + ' Вт інвертор' : 'будинок';
     const eRows = H0 ? [
       ['Напруга мережі', island ? '<span class="pill off">0 В</span>' : unit(at(H0, 'R-phase Grid Voltage'), 'В', 1),
         gv.length ? 'сьогодні ' + nf(Math.min(...gv), 0) + '–' + nf(Math.max(...gv), 0) + ' В' : 'сьогодні мережі не було'],
@@ -881,6 +890,8 @@ footer a{color:inherit}
           'зараз ' + nf(cur, 2) + ' А, ' + (pct >= 80 ? '<span style="color:var(--warn)">' + nf(pct) + '% від межі</span>' : nf(pct) + '% від межі')]];
       })() : []),
       ['Батарея (шина)', unit(at(H0, 'Battery Voltage'), 'В', 2), unit(at(H0, 'Battery Current'), 'А', 1)],
+      ['Власні потреби системи', selfW == null ? '–' : '~' + nf(selfW) + ' Вт' + (selfNow != null && selfNow > 0 && selfNow < 300 ? '<small style="display:inline;margin-left:6px">зараз ' + nf(selfNow) + ' Вт</small>' : ''),
+        selfW == null ? 'порахую під час першого відключення' : selfSrc + ' · ~' + nf(selfW * 24 / 1000, 1) + ' кВт·год/добу'],
       ['Запис від', hm(ts(H0[0])), 'дані кожні 5 хв']
     ] : [];
     $('elec').innerHTML = eRows.length ? eRows.map(r => '<dt>' + r[0] + '</dt><dd>' + r[1] + (r[2] ? '<small>' + r[2] + '</small>' : '') + '</dd>').join('')
@@ -896,6 +907,13 @@ footer a{color:inherit}
       ['Сонце', PV['PV Daily Generation'], PV['PV Monthly Generation'], PV['PV Yearly Generation'], PV['PV Total Generation']],
       ['Віддано в мережу', G['Daily Energy Consumption Sell'], G['Monthly Energy Consumption Sell'], G['Yearly Energy Consumption Sell'], G['Total Energy Consumption Sell']]
     ];
+    // власні потреби за балансом: (з мережі + сонце + розряд) − (будинок + заряд + експорт)
+    const bal = (imp, pv, dis, ld, chg, ex) => [imp, ld].some(x => num(x) == null) ? null : Math.max(0, num(imp) + (num(pv) || 0) + (num(dis) || 0) - num(ld) - (num(chg) || 0) - (num(ex) || 0));
+    en.push(['Власні потреби системи<small style="display:block;font-size:11px">баланс; місяць і рік без поправки на батарею</small>',
+      bal(G['Daily Energy Consumption Purchase'], PV['PV Daily Generation'], B['Battery Daily Discharge Energy'], L['Daily Load Energy Consumption'], B['Battery Daily Charge Energy'], G['Daily Energy Consumption Sell']),
+      bal(G['Monthly Energy Consumption Purchase'], PV['PV Monthly Generation'], 0, L['Monthly Load Energy Consumption'], 0, G['Monthly Energy Consumption Sell']),
+      bal(G['Yearly Energy Consumption Purchase'], PV['PV Yearly Generation'], 0, L['Yearly Load Energy Consumption'], 0, G['Yearly Energy Consumption Sell']),
+      null]);
     $('energy').innerHTML = en.map(r => '<tr><td>' + r[0] + '</td>' + r.slice(1).map(v => '<td>' + c(num(v)) + '</td>').join('') + '</tr>').join('');
 
     // ресурс батареї
