@@ -886,8 +886,7 @@ footer a{color:inherit}
       })() : []),
       ['Батарея (шина)', unit(at(H0, 'Battery Voltage'), 'В', 2), unit(at(H0, 'Battery Current'), 'А', 1)],
       ['Власні потреби системи', selfW == null ? '–' : '~' + nf(selfW) + ' Вт' + (selfNow != null && selfNow > 0 && selfNow < 300 ? '<small style="display:inline;margin-left:6px">зараз ' + nf(selfNow) + ' Вт</small>' : ''),
-        selfW == null ? 'порахую під час першого відключення' : selfSrc + ' · ~' + nf(selfW * 24 / 1000, 1) + ' кВт·год/добу'],
-      ['Запис від', hm(ts(H0[0])), 'дані кожні 5 хв']
+        selfW == null ? 'порахую під час першого відключення' : selfSrc + ' · ~' + nf(selfW * 24 / 1000, 1) + ' кВт·год/добу']
     ] : [];
     $('elec').innerHTML = eRows.length ? eRows.map(r => '<dt>' + r[0] + '</dt><dd>' + r[1] + (r[2] ? '<small>' + r[2] + '</small>' : '') + '</dd>').join('')
       : '<dt>Немає даних за сьогодні</dt><dd></dd>';
