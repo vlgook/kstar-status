@@ -112,6 +112,35 @@ table.en td small{color:var(--mute);font-weight:500;font-size:11px;margin-left:2
 .dsum{display:flex;gap:8px 20px;flex-wrap:wrap;margin-top:12px;font-size:13px;color:var(--mute)}
 .dsum b{color:var(--ink);font-weight:700}
 .dsum small{font-size:11px;opacity:.8}
+#lv{all:unset;cursor:pointer;height:40px;padding:0 12px;border-radius:12px;display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);background:var(--card);font-size:13px;font-weight:600;color:var(--mute)}
+#lv.on{color:var(--batt);border-color:color-mix(in srgb,var(--batt) 45%,transparent);box-shadow:0 0 0 3px color-mix(in srgb,var(--batt) 12%,transparent)}
+@media (max-width:559px){#lv .lbl{display:none}#lv{padding:0;width:40px;justify-content:center}}
+.chV{position:relative;height:150px;margin-top:14px}
+.subh{font-size:12px;color:var(--mute);margin:16px 0 4px;font-weight:600}
+.pack .meta2{grid-column:2/-1;color:var(--mute);font-size:12px}
+.pack .meta2 b{color:var(--ink);font-weight:600}
+/* статистика відключень */
+.seg{display:inline-flex;background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:3px}
+.seg button{all:unset;cursor:pointer;padding:4px 12px;border-radius:7px;font-size:13px;font-weight:600;color:var(--mute)}
+.seg button.on{background:var(--card);color:var(--ink);box-shadow:0 1px 2px rgba(0,0,0,.1)}
+.ostats{display:grid;grid-template-columns:repeat(2,1fr);gap:12px 16px;margin:4px 0 14px}
+@media (min-width:640px){.ostats{grid-template-columns:repeat(5,1fr)}}
+.ostats label{display:block;color:var(--mute);font-size:12px}
+.ostats b{font-size:20px;font-weight:800}
+.tl{display:grid;grid-template-columns:62px 1fr;gap:3px 10px;align-items:center;font-size:12px}
+.tl .dl{color:var(--mute);white-space:nowrap}
+.tl .dl.we{color:var(--ink)}
+.tl .tr{position:relative;height:14px;border-radius:4px;background:color-mix(in srgb,var(--ok) 13%,transparent);overflow:hidden}
+.tl .tr i{position:absolute;top:0;bottom:0;background:var(--off);opacity:.85;min-width:2px}
+.tl .tr i.sh{opacity:1;width:2px!important}
+.tl .tr.nod{background:repeating-linear-gradient(45deg,transparent 0 4px,color-mix(in srgb,var(--mute) 15%,transparent) 4px 8px)}
+.tl .axis{position:relative;height:14px;color:var(--mute);font-size:10px}
+.tl .axis span{position:absolute;transform:translateX(-50%)}
+.hist{display:grid;grid-template-columns:repeat(24,1fr);gap:2px;align-items:end;height:70px;margin-top:4px}
+.hist i{display:block;background:var(--off);border-radius:3px 3px 0 0;min-height:2px;opacity:.8}
+.hax{display:grid;grid-template-columns:repeat(24,1fr);gap:2px;font-size:10px;color:var(--mute);text-align:center}
+.onote{font-size:13px;color:var(--mute);margin-top:10px}
+.onote b{color:var(--ink)}
 .kv{display:grid;grid-template-columns:repeat(2,1fr);gap:14px 16px}
 .kv label{display:block;color:var(--mute);font-size:12px}
 .kv b{font-size:20px;font-weight:700}
@@ -123,7 +152,7 @@ footer a{color:inherit}
 <div class="wrap">
   <header>
     <div><h1 id="name">KSTAR</h1><div class="upd" id="upd">Завантаження…</div></div>
-    <div class="hbtn"><button id="nt" title="Сповіщення при зміні стану мережі та заряду">🔕 Сповіщення</button><button id="rf" title="Оновити">↻</button></div>
+    <div class="hbtn"><button id="lv" title="Швидке оновлення: даталогер шле дані кожні ~10 с (вимкнеться саме через 10 хв)">⚡<span class="lbl"> Живий режим</span></button><button id="nt" title="Сповіщення при зміні стану мережі та заряду">🔕 Сповіщення</button><button id="rf" title="Оновити">↻</button></div>
   </header>
   <div class="note" id="note"></div>
 
@@ -152,13 +181,26 @@ footer a{color:inherit}
     </section>
     <section class="card span2"><h2>Ресурс батареї</h2>
       <div class="res">
-        <div class="cyc"><b id="cyc">–</b> <em>еквівалентних повних циклів</em>
+        <div class="cyc"><b id="cyc">–</b> <em id="cycLbl">циклів</em>
           <div class="cbar"><i id="cycBar" style="width:0"></i></div>
           <em id="cycTxt"></em></div>
         <dl id="resDl"></dl>
       </div>
     </section>
   </div>
+  <section class="card" style="margin-top:12px">
+    <div class="chhead">
+      <h2>Відключення: статистика</h2>
+      <div class="seg" id="oSeg"><button data-d="7">7 днів</button><button data-d="14" class="on">14 днів</button><button data-d="28">28 днів</button></div>
+    </div>
+    <div class="ostats" id="oStats"></div>
+    <div class="tl" id="oTl"></div>
+    <div class="subh">Як часто немає світла в цю годину, % днів</div>
+    <div class="hist" id="oHist"></div>
+    <div class="hax" id="oHax"></div>
+    <div class="onote" id="oNote"></div>
+  </section>
+
   <section class="card" style="margin-top:12px">
     <div class="chhead">
       <h2>Графік за добу</h2>
@@ -172,6 +214,8 @@ footer a{color:inherit}
     </div>
     <div class="chbox"><canvas id="chart"></canvas></div>
     <div class="dsum" id="dsum"></div>
+    <div class="subh">Якість мережі: напруга, В <span style="font-weight:500">(пунктир – межі ±10% від 230 В)</span></div>
+    <div class="chV"><canvas id="chartV"></canvas></div>
   </section>
   <footer><span id="dev"></span><a href="https://sync.ksdatacloud.com/" target="_blank" rel="noopener">Портал KSTAR →</a></footer>
 </div>
@@ -315,7 +359,7 @@ footer a{color:inherit}
   paintNt();
 
   // ---- графік за добу ----
-  let chart = null, chartDay = null; // null = сьогодні
+  let chart = null, chartV = null, chartDay = null; // null = сьогодні
   const DAYS = ['неділя', 'понеділок', 'вівторок', 'середа', 'четвер', 'пʼятниця', 'субота'];
   const alpha = (c, a) => { const h = c.replace('#', ''); if (h.length !== 6) return c; const n = parseInt(h, 16); return 'rgba(' + (n >> 16 & 255) + ',' + (n >> 8 & 255) + ',' + (n & 255) + ',' + a + ')'; };
   const cssv = v => getComputedStyle(document.documentElement).getPropertyValue(v).trim();
@@ -333,7 +377,10 @@ footer a{color:inherit}
   // ---- тривоги мережі з історії: точні інтервали відключень ----
   let ALM = {list: [], pages: 0, done: false, at: 0}, ACTIVE = [];
   async function alarmIntervals(day) {
-    const start = new Date(day + 'T00:00:00').getTime(), end = start + 864e5;
+    const start = new Date(day + 'T00:00:00').getTime();
+    return alarmRange(start, start + 864e5);
+  }
+  async function alarmRange(start, end) {
     if (Date.now() - ALM.at > 5 * 60000) ALM = {list: [], pages: 0, done: false, at: Date.now()};
     while (!ALM.done && ALM.pages < 10 && (!ALM.list.length || ts(ALM.list[ALM.list.length - 1].saveTime) > start)) {
       const h = await api('/web/residential/station/detail/history/fault', {stationId: ST.id, pageNumber: ALM.pages + 1, pageSize: 200});
@@ -345,8 +392,8 @@ footer a{color:inherit}
     if (!covered) return null;
     const iv = ALM.list.concat(ACTIVE)
       .filter(f => /grid/i.test(f.faultMessage || ''))
-      .map(f => [ts(f.saveTime), f.removeTime ? ts(f.removeTime) : Date.now()])
-      .filter(v => v[1] > start && v[0] < end)
+      .map(f => [ts(f.saveTime), Math.min(Date.now(), f.removeTime ? ts(f.removeTime) : Date.now())])
+      .filter(v => v[1] > v[0] && v[1] > start && v[0] < end)
       .sort((a, b) => a[0] - b[0]);
     const m = [];
     iv.forEach(v => { const l = m[m.length - 1]; if (l && v[0] <= l[1] + 1000) l[1] = Math.max(l[1], v[1]); else m.push(v.slice()); });
@@ -446,9 +493,169 @@ footer a{color:inherit}
     };
     if (chart) chart.destroy();
     chart = new Chart($('chart'), cfg);
+
+    // якість мережі: напруга мережі і виходу інвертора
+    const iIV = k('R-phase Inverter Voltage'), iGF = k('R-phase Grid Frequency');
+    const gV = [], iV = [];
+    let pT = null;
+    R.forEach(r => {
+      const t = ts(r[0]);
+      if (pT && t - pT > 16 * 60000) { gV.push({x: t - 1, y: null}); iV.push({x: t - 1, y: null}); }
+      const v = Number(r[iGV]) || 0;
+      gV.push({x: t, y: v > 50 ? v : null, f: Number(r[iGF]) || null});
+      iV.push({x: t, y: Number(r[iIV]) || null});
+      pT = t;
+    });
+    const limPlugin = {id: 'lim', beforeDatasetsDraw(c) {
+      const {ctx, chartArea: a, scales: {y}} = c; ctx.save(); ctx.strokeStyle = alpha(cOff, .6); ctx.setLineDash([4, 4]);
+      [207, 253].forEach(v => { const py = y.getPixelForValue(v); ctx.beginPath(); ctx.moveTo(a.left, py); ctx.lineTo(a.right, py); ctx.stroke(); });
+      ctx.restore();
+    }};
+    if (chartV) chartV.destroy();
+    chartV = new Chart($('chartV'), {
+      type: 'line',
+      data: {datasets: [
+        {label: 'Мережа', data: gV, borderColor: cGrid, borderWidth: 1.8, pointRadius: 0, tension: .2, spanGaps: false},
+        {label: 'Вихід інвертора', data: iV, borderColor: alpha(cSoc, .6), borderWidth: 1.2, borderDash: [3, 3], pointRadius: 0, tension: .2, spanGaps: false}
+      ]},
+      options: {
+        animation: false, maintainAspectRatio: false, interaction: {mode: 'index', intersect: false},
+        scales: {
+          x: {type: 'linear', min: x0, max: x1, grid: {color: line}, border: {display: false},
+              afterBuildTicks: ax => { ax.ticks = Array.from({length: 9}, (_, i) => ({value: x0 + i * 3 * 3600e3})); },
+              ticks: {color: ink, maxRotation: 0, callback: v => v >= x1 ? '24:00' : hm(v)}},
+          y: {suggestedMin: 200, suggestedMax: 255, grid: {color: line}, border: {display: false}, ticks: {color: ink, maxTicksLimit: 5}},
+          y1: {position: 'right', display: true, grid: {display: false}, border: {display: false}, ticks: {display: false}}
+        },
+        plugins: {legend: {display: false}, tooltip: {callbacks: {
+          title: it => hm(it[0].parsed.x),
+          label: it => ' ' + it.dataset.label + ' ' + (it.parsed.y == null ? 'немає' : nf(it.parsed.y, 1) + ' В' + (it.raw.f ? ', ' + nf(it.raw.f, 2) + ' Гц' : ''))
+        }}}
+      },
+      plugins: [bandsPlugin, limPlugin]
+    });
   }
   $('dPrev').addEventListener('click', () => shiftDay(-1));
   $('dNext').addEventListener('click', () => shiftDay(1));
+
+  // ---- прошивка, межа розряду (налаштування інвертора) ----
+  let UPG = null, DOD = null;
+  function lsJson(k) { try { return JSON.parse(LS.get(k)); } catch (e) { return null; } }
+  async function loadUpgrade() {
+    const c = lsJson('kstarUpg');
+    if (c && Date.now() - c.at < 6 * 3600e3) { UPG = c.v; return; }
+    try { UPG = await api('/web/station/detail/need/upgarde/V2?stationId=' + ST.id); LS.set('kstarUpg', JSON.stringify({at: Date.now(), v: UPG})); } catch (e) {}
+  }
+  async function readParam(setItem, command) {
+    const r = await api('/residential/kse/remote/readvalue', {deviceId: ST.cid, setItem: setItem, command: String(command), coefficient: 1, registerCount: 1});
+    for (let i = 0; i < 12; i++) {
+      await new Promise(z => setTimeout(z, 2000));
+      const x = await api('/residential/kse/remote/readvalue/result?commandId=' + r.commandId);
+      if (x && x.status === 'SUCCESS') return x.value;
+      if (x && /fail|error|timeout/i.test(x.status || '')) return null;
+    }
+    return null;
+  }
+  async function loadDod() {
+    const c = lsJson('kstarDod');
+    if (c && Date.now() - c.at < 24 * 3600e3) { DOD = c; return; }
+    try {
+      const dod = await readParam('offgriddod', 3061), dde = await readParam('dde', 3059);
+      if (dod != null) { DOD = {at: Date.now(), dod: Number(dod), dde: dde == null ? null : Number(dde)}; LS.set('kstarDod', JSON.stringify(DOD)); }
+    } catch (e) {}
+  }
+  const minSocEff = () => (DOD && DOD.dde !== 0 && DOD.dod > 0) ? 100 - DOD.dod : MIN_SOC;
+
+  // ---- живий режим (Quick Update порталу) ----
+  let LIVE = null, LAST = null;
+  async function liveTick() {
+    if (!LIVE || !LAST) return;
+    if (Date.now() > LIVE.until) { liveStop(); return; }
+    try {
+      const [lg, vr] = await Promise.all([
+        api('/residential/device/detail/logic?collectId=' + ST.cid + '&refreshFlag=true'),
+        api('/residential/device/detail/overview/version?deviceId=' + ST.cid + '&stime=' + stime())
+      ]);
+      LAST[0] = lg; LAST[2] = vr;
+      render.apply(null, LAST);
+      const left = Math.max(0, Math.round((LIVE.until - Date.now()) / 60000));
+      $('upd').textContent = '⚡ живий режим · ' + hm(Date.now()) + ' · ще ' + left + ' хв';
+    } catch (e) {}
+  }
+  async function liveStart() {
+    try { await api('/residential/device/detail/start/refresh?collectId=' + ST.cid); } catch (e) { alert('Портал не ввімкнув швидке оновлення: ' + e.message); return; }
+    LIVE = {until: Date.now() + 10 * 60000, timer: setInterval(liveTick, 10000)};
+    $('lv').classList.add('on');
+    setTimeout(liveTick, 1500);
+  }
+  function liveStop(silent) {
+    if (!LIVE) return;
+    clearInterval(LIVE.timer); LIVE = null;
+    $('lv').classList.remove('on');
+    try { fetch(BASE + '/residential/device/detail/stop/refresh?collectId=' + ST.cid, {headers: {Authorization: 'Bearer ' + token()}, keepalive: true}); } catch (e) {}
+    if (!silent) refresh();
+  }
+  $('lv').addEventListener('click', () => { if (!ST) return; LIVE ? liveStop() : liveStart(); });
+  window.addEventListener('pagehide', () => liveStop(true));
+
+  // ---- статистика відключень за N днів ----
+  let oDays = 14;
+  async function loadOutStats() {
+    if (!ST) return;
+    const today0 = new Date(kyivDate() + 'T00:00:00').getTime();
+    const start = today0 - (oDays - 1) * 864e5, now = Date.now();
+    let iv;
+    try { iv = await alarmRange(start, now); } catch (e) { iv = null; }
+    if (!iv) { $('oNote').textContent = 'Журнал тривог не покриває весь період.'; return; }
+    const oldest = ALM.list.length ? ts(ALM.list[ALM.list.length - 1].saveTime) : now;
+    const SHORT = 5 * 60000;
+    const longs = iv.filter(v => v[1] - v[0] >= SHORT), shorts = iv.filter(v => v[1] - v[0] < SHORT);
+    const totMin = longs.reduce((a, v) => a + (Math.min(v[1], now) - Math.max(v[0], start)) / 60000, 0);
+    const mx = longs.reduce((a, v) => Math.max(a, v[1] - v[0]), 0) / 60000;
+    const st = [
+      ['Відключень', longs.length],
+      ['Без світла', dur(totMin)],
+      ['В середньому', dur(totMin / oDays) + '/добу'],
+      ['Найдовше', longs.length ? dur(mx) : '–'],
+      ['Коротких провалів', shorts.length]
+    ];
+    $('oStats').innerHTML = st.map(x => '<div><label>' + x[0] + '</label><b>' + x[1] + '</b></div>').join('');
+
+    // смуги по днях: найновіший день зверху
+    const hourHits = new Array(24).fill(0);
+    let rows = '', daysWithData = 0;
+    for (let i = 0; i < oDays; i++) {
+      const d0 = today0 - i * 864e5, d1 = d0 + 864e5, d = new Date(d0 + 12 * 3600e3);
+      const noData = d1 <= oldest && !ALM.done;
+      const segs = iv.filter(v => v[1] > d0 && v[0] < d1).map(v => [Math.max(v[0], d0), Math.min(v[1], d1, now)]);
+      if (!noData) daysWithData++;
+      for (let h = 0; h < 24; h++) { const a = d0 + h * 3600e3, b = a + 3600e3; if (segs.some(v => v[1] > a && v[0] < b)) hourHits[h]++; }
+      const we = d.getDay() === 0 || d.getDay() === 6;
+      rows += '<div class="dl' + (we ? ' we' : '') + '">' + DOW2[d.getDay()] + ' ' + p2(d.getDate()) + '.' + p2(d.getMonth() + 1) + '</div><div class="tr' + (noData ? ' nod' : '') + '">' +
+        segs.map(v => { const l = (v[0] - d0) / 864e5 * 100, w = (v[1] - v[0]) / 864e5 * 100, sh = v[1] - v[0] < SHORT;
+          return '<i' + (sh ? ' class="sh"' : '') + ' style="left:' + l.toFixed(2) + '%;width:' + w.toFixed(2) + '%" title="' + hm(v[0]) + '–' + hm(v[1]) + ' (' + dur((v[1] - v[0]) / 60000) + ')"></i>'; }).join('') + '</div>';
+    }
+    rows += '<div></div><div class="axis">' + [0, 6, 12, 18, 24].map(h => '<span style="left:' + (h / 24 * 100) + '%">' + h + '</span>').join('') + '</div>';
+    $('oTl').innerHTML = rows;
+
+    const n = Math.max(1, daysWithData);
+    $('oHist').innerHTML = hourHits.map((c, h) => '<i title="' + h + ':00–' + (h + 1) + ':00: ' + Math.round(c / n * 100) + '% днів" style="height:' + Math.max(2, c / n * 100) + '%"></i>').join('');
+    $('oHax').innerHTML = hourHits.map((c, h) => '<span>' + (h % 3 === 0 ? h : '') + '</span>').join('');
+
+    // години, коли світла немає щонайменше в половині днів
+    const share = hourHits.map(c => c / n), ranges = [];
+    let rs = null;
+    share.concat([0]).forEach((v, h) => { if (v >= .5 && rs === null) rs = h; if (v < .5 && rs !== null) { ranges.push([rs, h]); rs = null; } });
+    const top = share.map((v, h) => [v, h]).sort((a, b) => b[0] - a[0])[0];
+    $('oNote').innerHTML = ranges.length
+      ? 'Найчастіше світла немає: <b>' + ranges.map(r => r[0] + ':00–' + r[1] + ':00').join(', ') + '</b> (у половині днів і частіше)'
+      : (top && top[0] > 0 ? 'Сталого графіка не видно. Найчастіше вимикають о <b>' + top[1] + ':00–' + (top[1] + 1) + ':00</b> (' + Math.round(top[0] * 100) + '% днів)' : 'Відключень за період не було');
+  }
+  const DOW2 = ['Нд', 'Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб'];
+  document.querySelectorAll('#oSeg button').forEach(b => b.addEventListener('click', () => {
+    document.querySelectorAll('#oSeg button').forEach(x => x.classList.toggle('on', x === b));
+    oDays = Number(b.dataset.d); loadOutStats();
+  }));
 
   function token() {
     for (const w of [window.opener, window]) {
@@ -491,12 +698,18 @@ footer a{color:inherit}
         api('/residential/device/detail/overview/version?deviceId=' + id + '&stime=' + t),
         api('/residential/device/detail/overview/realdata/v2?deviceId=' + id + '&stime=' + t),
         api('/web/fault/list/real', {current: 1, size: 30}),
-        api('/residential/history/data/kse/list?deviceId=' + id + '&stime=' + kyivDate())
+        api('/residential/history/data/kse/list?deviceId=' + id + '&stime=' + kyivDate()),
+        api('/residential/history/data/bms/list?deviceId=' + id + '&stime=' + kyivDate())
       ]);
       const bad = r.slice(0, 3).find(x => x.status === 'rejected');
       if (bad) throw bad.reason;
       const v = r.map(x => x.status === 'fulfilled' ? x.value : null);
-      const rs = render(v[0], v[1], v[2], v[3], v[4], v[5]);
+      if (LIVE) { try { v[0] = await api('/residential/device/detail/logic?collectId=' + id + '&refreshFlag=true'); } catch (e) {} }
+      LAST = v;
+      if (!UPG) await loadUpgrade();
+      if (!DOD) loadDod().then(() => { if (LAST) render.apply(null, LAST); });
+      const rs = render.apply(null, v);
+      if (!refresh.statsAt || Date.now() - refresh.statsAt > 5 * 60000) { refresh.statsAt = Date.now(); loadOutStats(); }
       updateSince(rs.island, v[5], rs.tData, rs.alarmStart);
       if (!chartDay) loadChart(v[5]);
       $('note').style.display = 'none';
@@ -511,7 +724,32 @@ footer a{color:inherit}
     }
   }
 
-  function render(logic, nav, ver, real, faults, hist) {
+  function bmsLine(r) {
+    if (!r) return '';
+    const T = LAST && LAST[6] && LAST[6].title || [];
+    const g = n => { const i = T.indexOf(n); return i >= 0 ? num(r[i]) : null; };
+    const cmax = g('Maximum Cell Voltage'), cmin = g('Minimum Cell Voltage');
+    const parts = [
+      'SOH <b>' + nf(g('Battery State of Health')) + '%</b>',
+      '<b>' + nf(g('Battery Pack Cycle Count')) + '</b> циклів',
+      '<b>' + nf(g('Battery Pack Total Capacity'), 1) + '</b>/' + nf(g('Battery Pack Design Rated Capacity')) + ' А·год',
+      cmax != null ? 'комірки <b>' + nf(cmin, 3) + '–' + nf(cmax, 3) + ' В</b> (Δ' + nf((cmax - cmin) * 1000) + ' мВ)' : null,
+      g('Battery Pack Cell Maximum Temperature') != null ? 'комірки ' + nf(g('Battery Pack Cell Minimum Temperature'), 1) + '–' + nf(g('Battery Pack Cell Maximum Temperature'), 1) + ' °C' : null,
+      g('Battery Pack MOS Maximum Temperature') != null ? 'MOS ' + nf(g('Battery Pack MOS Maximum Temperature'), 1) + ' °C' : null,
+      g('Battery Pack Balance Status') ? 'балансування' : null
+    ].filter(Boolean);
+    return '<div class="meta2">' + parts.join(' · ') + '</div>';
+  }
+
+  function fwCell(ver) {
+    const L = (UPG && UPG.list) || [];
+    const up = L.filter(x => x.targetVersion && x.targetVersion !== x.deviceVersion);
+    if (up.length) return '<span class="pill warn">є оновлення</span><small>' + up.map(x => String(x.deviceType).toUpperCase() + ' ' + x.deviceVersion + ' → ' + x.targetVersion).join(', ') + '</small>';
+    if (UPG) return '<span class="pill ok">актуальна</span><small>ARM ' + (ver['ARM Version'] || '–') + ', DSP ' + (ver['DSP Version'] || '–') + '</small>';
+    return 'ARM ' + (ver['ARM Version'] || '–') + '<small>DSP ' + (ver['DSP Version'] || '–') + '</small>';
+  }
+
+  function render(logic, nav, ver, real, faults, hist, bms) {
     const sys = String(ver['System Status'] || ''), inv = String(ver['INV Status'] || ''), dcdc = String(ver['DCDC Status'] || '');
     const island = /island|off.?grid/i.test(sys + ' ' + inv);
     const tData = ts(nav.saveTime), age = (Date.now() - tData) / 60000;
@@ -540,11 +778,12 @@ footer a{color:inherit}
     $('soc').style.color = soc < 30 ? col : '';
     $('socBar').style.width = Math.max(0, Math.min(100, soc)) + '%';
     $('socBar').style.background = col;
-    const usable = Math.max(0, (soc - MIN_SOC) / 100 * BATT_KWH);
+    const MINS = minSocEff();
+    const usable = Math.max(0, (soc - MINS) / 100 * BATT_KWH);
     if (load > 20) {
       const h = usable * 1000 / load;
       $('autoH').textContent = '≈ ' + (h >= 48 ? Math.round(h / 24) + ' д' : h >= 10 ? Math.round(h) + ' год' : dur(h * 60));
-      $('autoTxt').textContent = 'запас до ' + MIN_SOC + '% при ' + nf(load) + ' Вт (' + nf(usable, 1) + ' кВт·год)';
+      $('autoTxt').textContent = 'запас до ' + MINS + '%' + (DOD ? ' (межа з інвертора)' : '') + ' при ' + nf(load) + ' Вт (' + nf(usable, 1) + ' кВт·год)';
     } else { $('autoH').textContent = '–'; $('autoTxt').textContent = 'запас'; }
 
     // потоки
@@ -573,7 +812,9 @@ footer a{color:inherit}
       ['Зв\'язок', '<span class="pill ' + (online ? 'ok">онлайн' : 'off">офлайн') + '</span>'],
       ['Останні дані', hm(tData) + ', ' + dmy(tData) + '<small>' + ago(age) + '</small>'],
       ['Температура батареї', B['Battery Temperature'] != null ? nf(B['Battery Temperature'], 1) + ' °C' : '–'],
-      ['Аварій на порталі', FL.length ? '<span class="pill warn">' + FL.length + '</span>' : '<span class="pill ok">0</span>']
+      ['Аварій на порталі', FL.length ? '<span class="pill warn">' + FL.length + '</span>' : '<span class="pill ok">0</span>'],
+      ['Межа розряду без мережі', DOD ? (DOD.dde === 0 ? 'не задана<small>DOD вимкнено, рахую до ' + MIN_SOC + '%</small>' : MINS + '%<small>DOD ' + DOD.dod + '%, з налаштувань інвертора</small>') : '…<small>читаю з інвертора</small>'],
+      ['Прошивка', fwCell(ver)]
     ];
     $('stat').innerHTML = rows.map(r => '<dt>' + r[0] + '</dt><dd>' + r[1] + '</dd>').join('');
 
@@ -586,19 +827,28 @@ footer a{color:inherit}
 
     // модулі
     const P = cat(5).filter(p => p.SN);
+    // BMS: найсвіжіший запис для кожного модуля
+    const BT = (bms && bms.title) || [], BD = (bms && bms.dataList) || [];
+    const bi = n => BT.indexOf(n), bv = (r, n) => { const i = bi(n); return r && i >= 0 ? num(r[i]) : null; };
+    const BMS = [];
+    BD.forEach(r => { const k = bv(r, 'Battery Pack'); if (k != null && !BMS[k]) BMS[k] = r; });
     if (P.length) {
       $('packs').innerHTML = P.map((p, i) => {
         const a = num(p['Battery Pack Current']), s = num(p['Battery Pack State of Charge'] ?? p['Battery State of Charge']);
         const dir = a < -0.1 ? 'розряд ' + nf(-a, 1) + ' A' : a > 0.1 ? 'заряд ' + nf(a, 1) + ' A' : 'струм 0 A';
         return '<div class="pack"><div class="nm">Модуль ' + (i + 1) + '<small>…' + String(p.SN).slice(-6) + '</small></div>' +
           '<div class="pb"><i style="width:' + Math.max(0, Math.min(100, s)) + '%"></i></div><div class="pv">' + nf(s) + '%</div>' +
-          '<div class="meta">' + nf(p['Battery Pack Voltage'], 2) + ' В · ' + dir + ' · BMS ' + (p['BMS Version Number'] || '–') + '</div></div>';
+          '<div class="meta">' + nf(p['Battery Pack Voltage'], 2) + ' В · ' + dir + ' · BMS ' + (p['BMS Version Number'] || '–') + '</div>' + bmsLine(BMS[i]) + '</div>';
       }).join('');
       const S = P.map(p => num(p['Battery State of Charge'])).filter(x => x != null);
       const V = P.map(p => num(p['Battery Pack Voltage'])).filter(x => x != null);
       const dS = S.length > 1 ? Math.max(...S) - Math.min(...S) : 0, dV = V.length > 1 ? Math.max(...V) - Math.min(...V) : 0;
+      const cellD = BMS.filter(Boolean).map(r => (bv(r, 'Maximum Cell Voltage') - bv(r, 'Minimum Cell Voltage')) * 1000).filter(x => !isNaN(x));
+      const flags = BMS.filter(Boolean).some(r => bv(r, 'Battery Pack Warning Flag') || bv(r, 'Battery Pack Protection Flag'));
       $('packFoot').innerHTML = '<span class="pill ' + (dS > 5 ? 'warn' : 'ok') + '">Різниця SoC ' + nf(dS) + '%</span>' +
-        '<span class="pill ' + (dV > 0.3 ? 'warn' : 'ok') + '">Різниця напруги ' + nf(dV * 1000) + ' мВ</span>';
+        '<span class="pill ' + (dV > 0.3 ? 'warn' : 'ok') + '">Різниця напруги ' + nf(dV * 1000) + ' мВ</span>' +
+        (cellD.length ? '<span class="pill ' + (Math.max(...cellD) > 80 ? 'warn' : 'ok') + '">Розкид комірок до ' + nf(Math.max(...cellD)) + ' мВ</span>' : '') +
+        (BMS.length ? '<span class="pill ' + (flags ? 'warn">BMS: попередження' : 'ok">BMS: без попереджень') + '</span>' : '');
     } else {
       $('packs').innerHTML = '<div class="empty">Дані модулів недоступні</div>'; $('packFoot').innerHTML = '';
     }
@@ -638,20 +888,23 @@ footer a{color:inherit}
 
     // ресурс батареї
     const tChg = num(B['Battery Total Charge Energy']), tDis = num(B['Battery Total Discharge Energy']);
-    const cyc = tDis == null ? null : tDis / BATT_KWH;
-    $('cyc').textContent = cyc == null ? '–' : nf(cyc, cyc < 10 ? 1 : 0);
+    const eqc = tDis == null ? null : tDis / BATT_KWH;
+    const bmsC = BMS.filter(Boolean).map(r => bv(r, 'Battery Pack Cycle Count')).filter(x => x != null);
+    const cyc = bmsC.length ? Math.max(...bmsC) : eqc;
+    $('cyc').textContent = cyc == null ? '–' : nf(cyc, cyc < 10 && !bmsC.length ? 1 : 0);
+    $('cycLbl').textContent = bmsC.length ? 'циклів за лічильником BMS' : 'еквівалентних повних циклів';
     $('cycBar').style.width = cyc == null ? '0' : Math.min(100, cyc / CYCLE_LIFE * 100) + '%';
-    $('cycTxt').textContent = cyc == null ? '' : nf(cyc / CYCLE_LIFE * 100, 2) + '% від умовних ' + nf(CYCLE_LIFE) + ' циклів · ' + nf(tDis, 0) + ' кВт·год / ' + nf(BATT_KWH, 1) + ' кВт·год';
+    $('cycTxt').textContent = cyc == null ? '' : nf(cyc / CYCLE_LIFE * 100, 2) + '% від умовних ' + nf(CYCLE_LIFE) + ' циклів' +
+      (eqc != null ? ' · за енергією ' + nf(eqc, 1) + ' екв. циклу (' + nf(tDis, 0) + ' / ' + nf(BATT_KWH, 1) + ' кВт·год)' : '');
     const resRows = [
       ['Заряджено за весь час', tChg == null ? '–' : nf(tChg, 0) + ' кВт·год'],
       ['Розряджено за весь час', tDis == null ? '–' : nf(tDis, 0) + ' кВт·год'],
-    ].concat(P.map((p, i) => ['Модуль ' + (i + 1) + '<small style="display:block;font-size:11px">заряд / розряд, BMS</small>', nf(num(p['Battery Pack Cumulative Charge Energy']), 0) + ' / ' + nf(num(p['Battery Pack Cumulative Discharge Energy']), 0) + ' кВт·год']));
+    ].concat(BMS.filter(Boolean).length ? [['Стан (SOH)', BMS.filter(Boolean).map(r => nf(bv(r, 'Battery State of Health')) + '%').join(' / ') + '<small>за BMS модулів</small>']] : []).concat(P.map((p, i) => ['Модуль ' + (i + 1) + '<small style="display:block;font-size:11px">заряд / розряд, BMS</small>', nf(num(p['Battery Pack Cumulative Charge Energy']), 0) + ' / ' + nf(num(p['Battery Pack Cumulative Discharge Energy']), 0) + ' кВт·год']));
     $('resDl').innerHTML = resRows.map(r => '<dt>' + r[0] + '</dt><dd>' + r[1] + '</dd>').join('');
 
+    $('dev').textContent = [ver['Inverter Model'], ver['ARM Version'] && 'ARM ' + ver['ARM Version'], ver['DSP Version'] && 'DSP ' + ver['DSP Version'], ver['Battery Name']].filter(Boolean).join(' · ');
     checkEvents({grid: island ? 0 : 1, soc: Math.round(soc), load: Math.round(load), online: online});
     return {island: island, tData: tData, alarmStart: gridF.length ? gridF[0] : null};
-
-    $('dev').textContent = [ver['Inverter Model'], ver['ARM Version'] && 'ARM ' + ver['ARM Version'], ver['DSP Version'] && 'DSP ' + ver['DSP Version'], ver['Battery Name']].filter(Boolean).join(' · ');
   }
 
   $('rf').addEventListener('click', refresh);

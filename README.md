@@ -25,6 +25,11 @@ API порталу не дозволяє запити з інших сайтів
 - напругу і частоту мережі (мін–макс за добу), вихід інвертора, резервну лінію
 - енергію за день, місяць, рік і весь час
 - ресурс батареї в еквівалентних повних циклах
+- статистика відключень за 7/14/28 днів: смуги по днях і частка днів без світла по годинах
+- якість мережі: напруга мережі й виходу інвертора за добу
+- живий режим (Quick Update): оновлення кожні ~10 с, автовимкнення через 10 хв
+- дані BMS по модулях: SOH, цикли, ємність, напруги й температури комірок
+- межа розряду без мережі, прочитана з інвертора (off-grid DOD), і наявність оновлень прошивки
 - звук і системне сповіщення про зміну мережі, SoC 30/15/95% і втрату зв'язку, поки вкладка відкрита
 
 ## Ендпоінти
@@ -36,6 +41,10 @@ API порталу не дозволяє запити з інших сайтів
 | Час останніх даних | `GET /api/residential/device/detail/navigation/data?collectId=…` |
 | Статуси системи | `GET /api/residential/device/detail/overview/version?deviceId=…&stime=…` |
 | Модулі, енергія | `GET /api/residential/device/detail/overview/realdata/v2?deviceId=…&stime=…` |
+| BMS по модулях (5 хв) | `GET /api/residential/history/data/bms/list?deviceId=…&stime=YYYY-MM-DD` |
+| Оновлення прошивки | `GET /api/web/station/detail/need/upgarde/V2?stationId=…` |
+| Читання параметра інвертора | `POST /api/residential/kse/remote/readvalue` → `GET …/readvalue/result?commandId=…` |
+| Швидке оновлення | `GET /api/residential/device/detail/start/refresh` / `stop/refresh?collectId=…`, далі `logic?refreshFlag=true` |
 | Аварії (активні) | `POST /api/web/fault/list/real` |
 | Історія тривог з часом зняття (`removeTime`) | `POST /api/web/residential/station/detail/history/fault` `{stationId, pageNumber, pageSize}` |
 | 5-хвилинна історія за добу (U, f мережі й інвертора) | `GET /api/residential/history/data/kse/list?deviceId=…&stime=YYYY-MM-DD` |
