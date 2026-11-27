@@ -874,6 +874,12 @@ footer a{color:inherit}
       ['Вихід інвертора', unit(at(H0, 'R-phase Inverter Voltage'), 'В', 1) + ' · ' + unit(at(H0, 'R-phase Inverter Frequency'), 'Гц', 2),
         unit(at(H0, 'R-phase Inverter Power'), 'Вт') + ', ' + unit(at(H0, 'R-phase Inverter Current'), 'А', 2)],
       ['Резервна лінія (Backup)', unit(at(H0, 'R-phase Backup Voltage'), 'В', 1), unit(at(H0, 'R-phase Backup Current'), 'А', 2)],
+      ...(num(ver['INV Max Output Current (A)']) ? (() => {
+        const mx = num(ver['INV Max Output Current (A)']), cur = Math.abs(at(H0, 'R-phase Inverter Current') || 0);
+        const kw = mx * (at(H0, 'R-phase Inverter Voltage') || 230) / 1000, pct = cur / mx * 100;
+        return [['Межа виходу інвертора', nf(mx, 1) + ' А · ~' + nf(kw, 1) + ' кВт',
+          'зараз ' + nf(cur, 2) + ' А, ' + (pct >= 80 ? '<span style="color:var(--warn)">' + nf(pct) + '% від межі</span>' : nf(pct) + '% від межі')]];
+      })() : []),
       ['Батарея (шина)', unit(at(H0, 'Battery Voltage'), 'В', 2), unit(at(H0, 'Battery Current'), 'А', 1)],
       ['Запис від', hm(ts(H0[0])), 'дані кожні 5 хв']
     ] : [];
