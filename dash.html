@@ -810,16 +810,10 @@ footer a{color:inherit}
 
     // статуси
     const rows = [
-      ['Мережа', '<span class="pill ' + (island ? 'off">немає' : 'ok">є') + '</span>'],
       ['Система', tr(sys)],
       ['Інвертор', tr(inv)],
-      ['Батарея (DC/DC)', tr(dcdc)],
       ['Режим роботи', tr(logic.sac)],
       ['Зв\'язок', '<span class="pill ' + (online ? 'ok">онлайн' : 'off">офлайн') + '</span><small>' + (online ? 'дані надходять' : 'даних немає понад 10 хв') + (String(ST.commun) === '0' && online ? '; портал помилково показує «офлайн»' : '') + '</small>'],
-      ['Останні дані', hm(tData) + ', ' + dmy(tData) + '<small>' + ago(age) + '</small>'],
-      ['Температура батареї', B['Battery Temperature'] != null ? nf(B['Battery Temperature'], 1) + ' °C' : '–'],
-      ['Аварій на порталі', FL.length ? '<span class="pill warn">' + FL.length + '</span>' : '<span class="pill ok">0</span>'],
-      ['Межа розряду без мережі', DOD ? (DOD.dde === 0 ? 'не задана<small>DOD вимкнено, рахую до ' + MIN_SOC + '%</small>' : MINS + '%<small>DOD ' + DOD.dod + '%, з налаштувань інвертора</small>') : '…<small>читаю з інвертора</small>'],
       ['Прошивка', fwCell(ver)]
     ];
     $('stat').innerHTML = rows.map(r => '<dt>' + r[0] + '</dt><dd>' + r[1] + '</dd>').join('');
@@ -929,10 +923,10 @@ footer a{color:inherit}
     const resRows = [
       ['Заряджено за весь час', tChg == null ? '–' : nf(tChg, 0) + ' кВт·год'],
       ['Розряджено за весь час', tDis == null ? '–' : nf(tDis, 0) + ' кВт·год'],
-    ].concat(BMS.filter(Boolean).length ? [['Стан (SOH)', BMS.filter(Boolean).map(r => nf(bv(r, 'Battery State of Health')) + '%').join(' / ') + '<small>за BMS модулів</small>']] : []).concat(P.map((p, i) => ['Модуль ' + (i + 1) + '<small style="display:block;font-size:11px">заряд / розряд, BMS</small>', nf(num(p['Battery Pack Cumulative Charge Energy']), 0) + ' / ' + nf(num(p['Battery Pack Cumulative Discharge Energy']), 0) + ' кВт·год']));
+    ].concat(BMS.filter(Boolean).length ? [['Стан (SOH)', BMS.filter(Boolean).map(r => nf(bv(r, 'Battery State of Health')) + '%').join(' / ') + '<small>за BMS модулів</small>']] : []);
     $('resDl').innerHTML = resRows.map(r => '<dt>' + r[0] + '</dt><dd>' + r[1] + '</dd>').join('');
 
-    $('dev').textContent = [ver['Inverter Model'], ver['ARM Version'] && 'ARM ' + ver['ARM Version'], ver['DSP Version'] && 'DSP ' + ver['DSP Version'], ver['Battery Name']].filter(Boolean).join(' · ');
+    $('dev').textContent = [ver['Inverter Model'], ver['Battery Name']].filter(Boolean).join(' · ');
     checkEvents({grid: island ? 0 : 1, soc: Math.round(soc), load: Math.round(load), online: online});
     return {island: island, tData: tData, alarmStart: gridF.length ? gridF[0] : null};
   }
